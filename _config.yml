@@ -1,4 +1,4 @@
 name: Sun Wenqi's Blog
 markdown: kramdown
-theme: jekyll-theme-minimal
+theme: jekyll-theme-cayman
 permalink: /blog/:year/:month/:day/:title
