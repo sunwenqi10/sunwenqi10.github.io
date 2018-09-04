@@ -1,5 +1,4 @@
 name: Sun Wenqi's Blog
 markdown: kramdown
-permalink: /blog/:year/:month/:day/:title
-
 theme: jekyll-theme-minimal
+permalink: /blog/:year/:month/:day/:title
