@@ -7,3 +7,7 @@ layout: default
 <div class="post">
   {{ content }}
 </div>
+
+{% if site.intensedebate_comments %}
+  {% include intensedebate_comments.html %}
+{% endif %}
