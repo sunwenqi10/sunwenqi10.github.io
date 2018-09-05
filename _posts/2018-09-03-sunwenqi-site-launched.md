@@ -1,6 +1,7 @@
 ---
 layout: post
 title: "Windows下使用github+Jekyll搭建个人博客"
+tags: [Jekyll, Github]
 date: 2018-09-03
 ---
 
