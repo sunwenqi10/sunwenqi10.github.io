@@ -4,6 +4,7 @@ title: "使用matplotlib和geopandas画交互式地图"
 tags: [Python]
 date: 2018-09-05
 ---
+
 + *目标：* 画出山东省日最高（低）温的预报偏差空间分布并进行一定程度的交互
 + *数据：*
   + 地图数据（.shp）[地图下载](https://download.csdn.net/download/melody46/9979083)
@@ -17,7 +18,7 @@ date: 2018-09-05
      + 鼠标左键点击站点，打印站点信息以及对应的预报偏差
 + *代码步骤：*
      1. 导入相应的包
-     ~~~python     
+     ~~~python
      import shapely
      import numpy as np
      import pandas as pd
@@ -71,7 +72,7 @@ date: 2018-09-05
      orders = []
      cities = []
      for poly,city in zip(sd.geometry, sd.NAME99):
-            if isinstance(poly, shapely.geometry.polygon.Polygon):
+         if isinstance(poly, shapely.geometry.polygon.Polygon):
                 cities.append(city)
                 patches.append(Polygon(np.asarray(poly.exterior)))      
                 values.append(city_val_df.loc[city]['bias_mos'])

@@ -1,5 +1,12 @@
 name: Sun Wenqi's Blog
-markdown: kramdown
+
 highlighter: rouge
+
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
 intensedebate_comments: true
+
 permalink: /blog/:year/:month/:day/:title
