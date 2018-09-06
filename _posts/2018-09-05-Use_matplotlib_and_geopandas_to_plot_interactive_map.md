@@ -18,7 +18,7 @@ date: 2018-09-05
      + 鼠标左键点击站点，打印站点信息以及对应的预报偏差
 + *代码步骤：*
      1. 导入相应的包
-     ~~~python
+     ```python
      import shapely
      import numpy as np
      import pandas as pd
@@ -32,9 +32,9 @@ date: 2018-09-05
      ### 使图片中正常显示中文
      plt.rcParams['font.sans-serif']=['SimHei'] #用来正常显示中文标签
      plt.rcParams['axes.unicode_minus']=False #用来正常显示负号
-     ~~~
+     ```
      2. 获取站点信息以及各站点预报的平均偏差，将各市内的站点偏差平均得到各市预报的平均偏差
-     ~~~python
+     ```python
      ### 获取站点信息
      '''
      文件示例：
@@ -61,7 +61,7 @@ date: 2018-09-05
      city_val_df = pd.merge(bias[['station','bias_mos']], location[['station','city']], on='station') \
                      .groupby('city')['bias_mos'].mean().reset_index().sort_values(by='bias_mos')
      city_val_df = city_val_df.assign(order=range(1, city_val_df.shape[0]+1)).set_index('city')
-     ~~~
+     ```
      3. 使用geopandas读取地图文件
      ~~~python
      ### 使用geopandas读取山东省地图文件

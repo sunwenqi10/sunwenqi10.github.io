@@ -14,6 +14,10 @@ layout: default
   {{ content }}
 </div>
 
+{% if site.google-code-prettify %}
+	  {% include google-code-prettify.html %}
+{% endif %}
+
 {% if site.intensedebate_comments %}
   {% include intensedebate_comments.html %}
 {% endif %}
