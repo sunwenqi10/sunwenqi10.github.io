@@ -12,7 +12,7 @@ date: 2018-09-03
   + 添加了访问统计功能（使用[百度统计](https://tongji.baidu.com/web/welcome/login)）
   + 添加了标签分类
   + 增加了代码高亮功能（使用[google code prettify](https://github.com/google/code-prettify)）
-  + 添加了公式显示（使用MathJax）
+  + 添加了公式显示（使用[MathJax](https://www.mathjax.org/)）
 
 2. 在本地电脑上下载[Github Deaktop](https://desktop.github.com/)以及[Jekyll](https://jekyllrb.com/docs/installation/)。Windows下安装Jekyll时Ruby路径最好不要有中文和空格，否则可能报错，推荐安装包默认设置。
 
