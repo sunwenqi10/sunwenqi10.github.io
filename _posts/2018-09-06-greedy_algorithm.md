@@ -10,6 +10,7 @@ date: 2018-09-06
 + *Task:* &nbsp;&nbsp; The goal in this problem is to find the minimum number of coins needed to change the input value(an integer) into coins with denominations 1, 5, and 10.
 + *Input Format:* &nbsp;&nbsp; The input consists of a single integer 𝑚(1 ≤ 𝑚 ≤ 10<sup>3</sup>)
 + *Output Format:* &nbsp;&nbsp; Output the minimum number of coins with denominations 1, 5, 10 that changes 𝑚
+
 ```python
 import sys
 def get_change(m):
