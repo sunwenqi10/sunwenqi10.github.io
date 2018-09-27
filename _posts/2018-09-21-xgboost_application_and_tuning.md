@@ -278,12 +278,11 @@ non_merge_sr = [c for c in counts['Source'].index if counts['Source'][c]>=100]
 
 dropped_columns = ['ID','Lead_Creation_Date','LoggedIn','Employer_Name','DOB','Loan_Amount_Submitted', \
                    'Loan_Tenure_Submitted','EMI_Loan_Submitted','Interest_Rate','Processing_Fee']
-var_to_encode = list(set(category_cols)-set(dropped_columns))
 
 def preprocess(X):
-    X['City'] = X['City'].apply(lambda x: 'others' if x not in non_merge_city and x is not np.nan else x)
-    X['Salary_Account'] = X['Salary_Account'].apply(lambda x: 'others' if x not in non_merge_sa and x is not np.nan else x)
-    X['Source'] = X['Source'].apply(lambda x: 'others' if x not in non_merge_sr and x is not np.nan else x)
+    X['City'] = X['City'].apply(lambda x: 'others' if x not in non_merge_city and not pd.isnull(x) else x)
+    X['Salary_Account'] = X['Salary_Account'].apply(lambda x: 'others' if x not in non_merge_sa and not pd.isnull(x) else x)
+    X['Source'] = X['Source'].apply(lambda x: 'others' if x not in non_merge_sr and not pd.isnull(x) else x)
 
     X['Age'] = X['DOB'].apply(lambda x: 118 - int(x[-2:]))
 
@@ -328,6 +327,7 @@ feat_imp = pd.Series(pipeline.named_steps['classifier'].get_booster().get_fscore
 feat_imp.plot(kind='bar', title='Feature Importances', figsize=(20,6)) #下图
 plt.ylabel('Feature Importance Score')
 # prediction and accuracy
+# AUC Score (Test): 0.8571
 predprob=pipeline.predict_proba(test[predictors_raw])[:,1]
 print("AUC Score (Test): %f" % metrics.roc_auc_score(test[target_raw], predprob))
 ```
