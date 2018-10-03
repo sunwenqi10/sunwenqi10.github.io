@@ -95,6 +95,7 @@ train_3 = train_2.drop(['DOB','Loan_Amount_Submitted','Loan_Tenure_Submitted','E
    var_to_encode = list(set(category_cols)-set(dropped_columns))
    for col in var_to_encode:
        train_3[col] = le.fit_transform(train_3[col])
+   ### pd.get_dummies can also be used directly without LabelEncoder    
    train_3 = pd.get_dummies(train_3, columns=var_to_encode)
    ```
 
@@ -251,6 +252,7 @@ import xgboost as xgb
 import matplotlib.pyplot as plt
 from sklearn import metrics
 from sklearn.cross_validation import train_test_split
+from sklearn.feature_extraction import DictVectorizer
 from sklearn.preprocessing import Imputer, FunctionTransformer
 from sklearn_pandas import DataFrameMapper, CategoricalImputer
 from sklearn.pipeline import FeatureUnion, Pipeline
@@ -305,12 +307,12 @@ categorical_imputation_mapper = DataFrameMapper(category_imputer,input_df=True,d
 numeric_categorical_union = FeatureUnion([("num_mapper", numeric_imputation_mapper), \
                                           ("cat_mapper", categorical_imputation_mapper)])
 
-def one_hot(X):
+def dictify(X):
     col_1 = [feature for feature in numeric_cols if feature not in dropped_columns]
     col_2 = [feature for feature in category_cols if feature not in dropped_columns]
     X_numeric = pd.DataFrame(X[:,0:len(col_1)], columns=col_1, dtype='float')
-    X_category = pd.get_dummies(pd.DataFrame(X[:,len(col_1):], columns=col_2))
-    return pd.concat([X_numeric,X_category], axis=1)
+    X_category = pd.DataFrame(X[:,len(col_1):], columns=col_2, dtype='str')
+    return pd.concat([X_numeric,X_category], axis=1).to_dict("records")
 
 tuned_xgb = xgb.XGBClassifier(learning_rate=0.01, n_estimators=1480, max_depth=4, min_child_weight=6, gamma=0.2, \
                               reg_alpha=0.01, reg_lambda=1, subsample=0.7, colsample_bytree=0.75, \
@@ -318,16 +320,21 @@ tuned_xgb = xgb.XGBClassifier(learning_rate=0.01, n_estimators=1480, max_depth=4
 
 # Create full pipeline
 pipeline = Pipeline([("preprocessor", FunctionTransformer(preprocess, validate=False)), \
-                     ("featureunion", numeric_categorical_union), ("encoder", FunctionTransformer(one_hot, validate=False)), \
-                     ("classifier", tuned_xgb)])
-
+                     ("featureunion", numeric_categorical_union), ("dictifier", FunctionTransformer(dictify, validate=False)), \
+                     ("onehot", DictVectorizer(sparse=False)), ("classifier", tuned_xgb)])
 pipeline.fit(train_X, train_y)
-# Feature importance
+
+#Feature importance
 feat_imp = pd.Series(pipeline.named_steps['classifier'].get_booster().get_fscore()).sort_values(ascending=False)
-feat_imp.plot(kind='bar', title='Feature Importances', figsize=(20,6)) #下图
-plt.ylabel('Feature Importance Score')
-# prediction and accuracy
-# AUC Score (Test): 0.8571
+features = [pipeline.named_steps['onehot'].feature_names_[int(i[1:])] for i in feat_imp.index]
+fig = feat_imp.plot(kind='bar', title='Feature Importances', figsize=(20,6))
+fig.set_xticklabels(features)
+fig.set_ylabel('Feature Importance Score')
+
+# individual prediction
+print(pipeline.predict_proba(test.iloc[[1]][predictors_raw]))
+# test data predictions
+# AUC Score (Test): 0.8568
 predprob=pipeline.predict_proba(test[predictors_raw])[:,1]
 print("AUC Score (Test): %f" % metrics.roc_auc_score(test[target_raw], predprob))
 ```
