@@ -327,7 +327,7 @@ pipeline.fit(train_X, train_y)
 #Feature importance
 feat_imp = pd.Series(pipeline.named_steps['classifier'].get_booster().get_fscore()).sort_values(ascending=False)
 features = [pipeline.named_steps['onehot'].feature_names_[int(i[1:])] for i in feat_imp.index]
-fig = feat_imp.plot(kind='bar', title='Feature Importances', figsize=(20,6))
+fig = feat_imp.plot(kind='bar', title='Feature Importances', figsize=(20,6)) #下图
 fig.set_xticklabels(features)
 fig.set_ylabel('Feature Importance Score')
 
