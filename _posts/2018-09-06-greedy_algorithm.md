@@ -14,15 +14,15 @@ date: 2018-09-06
 ```python
 import sys
 def get_change(m):
-      #write your code here
-      n10 = m//10
-      n5 = (m%10)//5
-      n1 = (m%10)%5
-      return n1+n5+n10
+    #write your code here
+    n10 = m//10
+    n5 = (m%10)//5
+    n1 = (m%10)%5
+    return n1+n5+n10
 ### run
 if __name__ == '__main__':
-      m = int(sys.stdin.read())
-      print(get_change(m))
+    m = int(sys.stdin.read())
+    print(get_change(m))
 ```
 
 *Question 2*
@@ -145,14 +145,14 @@ import sys
 from functools import cmp_to_key
 
 def comp(a,b):
-	if a[0]>b[0]:
-		return 1
-	elif a[0]<b[0]:
-		return -1
-	else:
-		ab = a+b
-		ba = b+a
-		return 1 if ab>ba else -1 if ab<ba else 0
+    if a[0]>b[0]:
+        return 1
+    elif a[0]<b[0]:
+        return -1
+    else:
+        ab = a+b
+        ba = b+a
+        return 1 if ab>ba else -1 if ab<ba else 0
 
 def largest_number(a):
     #write your code here
