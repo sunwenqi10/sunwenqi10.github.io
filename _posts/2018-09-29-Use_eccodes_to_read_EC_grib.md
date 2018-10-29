@@ -84,6 +84,7 @@ def getVar(file, varname):
     var_summary['lon_delta'] = lon_ec_delta
     var_summary['west_to_east'] = w_to_e
 
+    ### levels and data values
     levels = []
     data_levels = []
     numlat = eccodes.codes_get(gid, 'Nj')
