@@ -45,7 +45,7 @@ def getVar(file, varname):
         sys.exit()
 
     ### time info
-    ymdh_start_utc = str(eccodes.codes_get(gid, 'dataDate')) + '%02d'%(eccodes.codes_get(gid, 'dataTime')//100)ZZ
+    ymdh_start_utc = str(eccodes.codes_get(gid, 'dataDate')) + '%02d'%(eccodes.codes_get(gid, 'dataTime')//100)
     delta_hours = int(eccodes.codes_get(gid, 'endStep'))
 
     ymdh_start_bj_date = datetime.strptime(ymdh_start_utc,'%Y%m%d%H') + timedelta(hours=8) #transform from utc to beijing
