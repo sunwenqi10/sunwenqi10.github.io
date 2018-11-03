@@ -15,7 +15,6 @@ date: 2018-11-03
 2. 减少过拟合
   + 设置树的最大深度(max_depth in sklearn.tree.DecisionTreeClassifier)
   + 设置每个叶子节点的最少样本个数(min_samples_leaf in sklearn.tree.DecisionTreeClassifier)
-  + 设置每次分裂使用的最大特征数(max_features in sklearn.tree.DecisionTreeClassifier)
   + 剪枝
 
 
