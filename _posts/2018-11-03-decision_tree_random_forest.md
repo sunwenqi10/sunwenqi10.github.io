@@ -40,26 +40,26 @@ Random Forest
   + 需要注意的是权重对于bootstrap的使用并没有影响，即bootstrap方法始终是等概率地从N个样本中选择，sklearn中的源码如下
   ```python
   if forest.bootstrap:
-         n_samples = X.shape[0]
-         if sample_weight is None:
-             curr_sample_weight = np.ones((n_samples,), dtype=np.float64)
-         else:
-             curr_sample_weight = sample_weight.copy() #已经包含了class_weight设为'balanced'或dict类型时的类别权重
+             n_samples = X.shape[0]
+             if sample_weight is None:
+                 curr_sample_weight = np.ones((n_samples,), dtype=np.float64)
+             else:
+                 curr_sample_weight = sample_weight.copy() #已经包含了class_weight设为'balanced'或dict类型时的类别权重
 
-         indices = _generate_sample_indices(tree.random_state, n_samples) #bootstrap
-         sample_counts = np.bincount(indices, minlength=n_samples)
-         curr_sample_weight *= sample_counts #根据新的样本集合中每个原始样本的个数来调整样本权重
-         ### 根据类别权重调整样本权重
-         if class_weight == 'subsample':
-             with catch_warnings():
-                 simplefilter('ignore', DeprecationWarning)
-                 curr_sample_weight *= compute_sample_weight('auto', y, indices)
-         elif class_weight == 'balanced_subsample':
-             curr_sample_weight *= compute_sample_weight('balanced', y, indices)
+             indices = _generate_sample_indices(tree.random_state, n_samples) #bootstrap
+             sample_counts = np.bincount(indices, minlength=n_samples)
+             curr_sample_weight *= sample_counts #根据新的样本集合中每个原始样本的个数来调整样本权重
+             ### 根据类别权重调整样本权重
+             if class_weight == 'subsample':
+                 with catch_warnings():
+                     simplefilter('ignore', DeprecationWarning)
+                     curr_sample_weight *= compute_sample_weight('auto', y, indices)
+             elif class_weight == 'balanced_subsample':
+                 curr_sample_weight *= compute_sample_weight('balanced', y, indices)
 
-         tree.fit(X, y, sample_weight=curr_sample_weight, check_input=False)
+             tree.fit(X, y, sample_weight=curr_sample_weight, check_input=False)
   else:
-         tree.fit(X, y, sample_weight=sample_weight, check_input=False)
+             tree.fit(X, y, sample_weight=sample_weight, check_input=False)
   ```
 
 
