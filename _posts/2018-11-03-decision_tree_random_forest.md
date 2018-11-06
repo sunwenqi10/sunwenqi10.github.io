@@ -11,7 +11,7 @@ CART
   + 将现有节点的数据分裂成两个子集，计算每个子集的gini index
   + 子集的Gini index: $$gini_{child}=\sum_{i=1}^K p_{ti} \sum_{i' \neq i} p_{ti'}=1-\sum_{i=1}^K p_{ti}^2$$ ， 其中K表示类别个数，$$p_{ti}$$表示分类为i的样本在子集中的比例，gini index可以理解为该子集中的数据被错分成其它类别的期望损失
   + 分裂后的Gini index: $$gini_s= \frac{N_1}{N}gini_{child_1}+\frac{N_2}{N}gini_{child_2}$$ ，其中N为分裂之前的样本数，$$N_1$$和$$N_2$$为分裂之后两个子集的样本数
-  + 选取使得$$gini_s$$最小的特征A和分裂点s进行分裂
+  + 选取使得$$gini_s$$最小的特征和分裂点进行分裂
 
 
 2. 减少过拟合
