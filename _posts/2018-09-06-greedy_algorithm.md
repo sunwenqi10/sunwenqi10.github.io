@@ -107,7 +107,7 @@ if __name__ == '__main__':
 ```
 
 *Question 5*
-+ *Introduction:* &nbsp;&nbsp; You are organizing a funny competition for children. As a prize fund you have 𝑛 candies. You would like to use these candies for top 𝑘 places in a competition with a natural restriction that a higher place gets a larger number of candies. To make as many children happy as possible, you are going to find the largest value of 𝑘 for which it is possible.
++ *Introduction:* &nbsp;&nbsp; You are organizing a funny competition for children. As a prize fund you have n candies. You would like to use these candies for top k places in a competition with a natural restriction that a higher place gets a larger number of candies. To make as many children happy as possible, you are going to find the largest value of k for which it is possible.
 + *Task:* &nbsp;&nbsp; The goal of this problem is to represent a given positive integer n as a sum of as many pairwise distinct positive integers as possible. That is, to find the maximum k such that n can be written as a<sub>1</sub> + a<sub>2</sub> + · · · + a<sub>k</sub> where a<sub>1</sub>, . . . , a<sub>k</sub> are positive integers and a<sub>i</sub>&ne;a<sub>j</sub> for all 1 ≤ i < j ≤ k.
 + *Input Format:* &nbsp;&nbsp; The input consists of a single integer n(1 ≤ n ≤ 10<sup>9</sup>)
 + *Output Format:* &nbsp;&nbsp; In the first line, output the maximum number k such that n can be represented as a sum of k pairwise distinct positive integers. In the second line, output k pairwise distinct positive integers that sum up to n (if there are many such representations, output any of them).
