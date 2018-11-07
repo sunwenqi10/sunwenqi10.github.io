@@ -156,4 +156,5 @@ fig.canvas.mpl_connect('pick_event', onpick)
 
 
 + **生成地图示例：**
-![img](/img/sd_temp.png)
+
+  ![img](/img/sd_temp.png)
