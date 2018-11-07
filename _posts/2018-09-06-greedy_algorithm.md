@@ -78,9 +78,9 @@ if __name__ == '__main__':
 
 *Question 4*
 + *Introduction:* &nbsp;&nbsp; You are responsible for collecting signatures from all tenants of a certain building. For each tenant, you know a period of time when he or she is at home. You would like to collect all signatures by visiting the building as few times as possible. The mathematical model for this problem is the following. You are given a set of segments on a line and your goal is to mark as few points on a line as possible so that each segment contains at least one marked point.
-+ *Task:* &nbsp;&nbsp; Given a set of 𝑛 segments {[𝑎0, 𝑏0], [𝑎1, 𝑏1], . . . , [𝑎<sub>𝑛−1</sub>, 𝑏<sub>𝑛−1</sub>]} with integer coordinates on a line, find the minimum number 𝑚 of points such that each segment contains at least one point. That is, find a set of integers 𝑋 of the minimum size such that for any segment [𝑎𝑖, 𝑏𝑖] there is a point 𝑥 ∈ 𝑋 such that 𝑎𝑖 ≤ 𝑥 ≤ 𝑏𝑖.
-+ *Input Format:* &nbsp;&nbsp; The first line of the input contains the number 𝑛 of segments. Each of the following 𝑛 lines contains two integers 𝑎𝑖 and 𝑏𝑖 (separated by a space) defining the coordinates of endpoints of the 𝑖-th segment(1 ≤ 𝑛 ≤ 100; 0 ≤ 𝑎𝑖 ≤ 𝑏𝑖 ≤ 10<sup>9</sup> for all 0 ≤ 𝑖 < 𝑛)
-+ *Output Format:* &nbsp;&nbsp; Output the minimum number 𝑚 of points on the first line and the integer coordinates of 𝑚 points (separated by spaces) on the second line. You can output the points in any order. If there are many such sets of points, you can output any set. (It is not difficult to see that there always exist a set of points of the minimum size such that all the coordinates of the points are integers.)
++ *Task:* &nbsp;&nbsp; Given a set of n segments {[a<sub>0</sub>, b<sub>0</sub>], [a<sub>1</sub>, b<sub>1</sub>], . . . , [a<sub>n−1</sub>, b<sub>n−1</sub>]} with integer coordinates on a line, find the minimum number m of points such that each segment contains at least one point. That is, find a set of integers X of the minimum size such that for any segment [a<sub>i</sub>, b<sub>i</sub>] there is a point x ∈ X such that a<sub>i</sub> ≤ x ≤ b<sub>i</sub>.
++ *Input Format:* &nbsp;&nbsp; The first line of the input contains the number n of segments. Each of the following n lines contains two integers a<sub>i</sub> and b<sub>i</sub> (separated by a space) defining the coordinates of endpoints of the i-th segment(1 ≤ n ≤ 100; 0 ≤ a<sub>i</sub> ≤ b<sub>i</sub> ≤ 10<sup>9</sup> for all 0 ≤ i < n)
++ *Output Format:* &nbsp;&nbsp; Output the minimum number m of points on the first line and the integer coordinates of m points (separated by spaces) on the second line. You can output the points in any order. If there are many such sets of points, you can output any set. (It is not difficult to see that there always exist a set of points of the minimum size such that all the coordinates of the points are integers.)
 
 ```python
 import sys
@@ -108,9 +108,9 @@ if __name__ == '__main__':
 
 *Question 5*
 + *Introduction:* &nbsp;&nbsp; You are organizing a funny competition for children. As a prize fund you have 𝑛 candies. You would like to use these candies for top 𝑘 places in a competition with a natural restriction that a higher place gets a larger number of candies. To make as many children happy as possible, you are going to find the largest value of 𝑘 for which it is possible.
-+ *Task:* &nbsp;&nbsp; The goal of this problem is to represent a given positive integer 𝑛 as a sum of as many pairwise distinct positive integers as possible. That is, to find the maximum 𝑘 such that 𝑛 can be written as 𝑎1 + 𝑎2 + · · · + 𝑎𝑘 where 𝑎1, . . . , 𝑎𝑘 are positive integers and ai&ne;aj for all 1 ≤ 𝑖 < 𝑗 ≤ 𝑘.
-+ *Input Format:* &nbsp;&nbsp; The input consists of a single integer 𝑛(1 ≤ 𝑛 ≤ 10<sup>9</sup>)
-+ *Output Format:* &nbsp;&nbsp; In the first line, output the maximum number 𝑘 such that 𝑛 can be represented as a sum of 𝑘 pairwise distinct positive integers. In the second line, output 𝑘 pairwise distinct positive integers that sum up to 𝑛 (if there are many such representations, output any of them).
++ *Task:* &nbsp;&nbsp; The goal of this problem is to represent a given positive integer n as a sum of as many pairwise distinct positive integers as possible. That is, to find the maximum k such that n can be written as a<sub>1</sub> + a<sub>2</sub> + · · · + a<sub>k</sub> where a<sub>1</sub>, . . . , a<sub>k</sub> are positive integers and a<sub>i</sub>&ne;a<sub>j</sub> for all 1 ≤ i < j ≤ k.
++ *Input Format:* &nbsp;&nbsp; The input consists of a single integer n(1 ≤ n ≤ 10<sup>9</sup>)
++ *Output Format:* &nbsp;&nbsp; In the first line, output the maximum number k such that n can be represented as a sum of k pairwise distinct positive integers. In the second line, output k pairwise distinct positive integers that sum up to n (if there are many such representations, output any of them).
 
 ```python
 import sys
@@ -137,8 +137,8 @@ if __name__ == '__main__':
 *Question 6*
 + *Introduction:* &nbsp;&nbsp; As the last question of a successful interview, your boss gives you a few pieces of paper with numbers on it and asks you to compose a largest number from these numbers. The resulting number is going to be your salary, so you are very much interested in maximizing this number. How can you do this?
 + *Task:* &nbsp;&nbsp; Compose the largest number out of a set of integers.
-+ *Input Format:* &nbsp;&nbsp; The first line of the input contains an integer 𝑛. The second line contains integers 𝑎1, 𝑎2, . . . , 𝑎𝑛(1 ≤ 𝑛 ≤ 100; 1 ≤ 𝑎𝑖 ≤ 10<sup>3</sup> for all 1 ≤ 𝑖 ≤ 𝑛)
-+ *Output Format:* &nbsp;&nbsp; Output the largest number that can be composed out of 𝑎1, 𝑎2, . . . , 𝑎𝑛.
++ *Input Format:* &nbsp;&nbsp; The first line of the input contains an integer n. The second line contains integers a<sub>1</sub>, a<sub>2</sub>, . . . , a<sub>n</sub>(1 ≤ n ≤ 100; 1 ≤ a<sub>i</sub> ≤ 10<sup>3</sup> for all 1 ≤ i ≤ n)
++ *Output Format:* &nbsp;&nbsp; Output the largest number that can be composed out of a<sub>1</sub>, a<sub>2</sub>, . . . , a<sub>n</sub>.
 
 ```python
 import sys
