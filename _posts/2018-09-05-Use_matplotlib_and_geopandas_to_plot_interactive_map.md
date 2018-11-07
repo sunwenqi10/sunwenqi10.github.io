@@ -149,7 +149,7 @@ def onpick(event):
                               location.iloc[ind]['city'], station_val[ind]))
             elif button==3 and isinstance(this, PatchCollection):
                 print('城市: {0}  排位: {1}  预报偏差: {2}'.format(cities[ind], int(orders[ind]+0.5), \
-                                                                   round(values[ind],2)))  
+                                                                  round(values[ind],2)))  
             return
 fig.canvas.mpl_connect('pick_event', onpick)
 ```
