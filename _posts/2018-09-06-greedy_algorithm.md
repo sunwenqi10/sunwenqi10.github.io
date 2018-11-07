@@ -8,8 +8,8 @@ date: 2018-09-06
 *Question 1*
 + *Introduction:* &nbsp;&nbsp; In this problem, you will design and implement an elementary greedy algorithm used by cashiers all over the world millions of times per day.
 + *Task:* &nbsp;&nbsp; The goal in this problem is to find the minimum number of coins needed to change the input value(an integer) into coins with denominations 1, 5, and 10.
-+ *Input Format:* &nbsp;&nbsp; The input consists of a single integer 𝑚(1 ≤ 𝑚 ≤ 10<sup>3</sup>)
-+ *Output Format:* &nbsp;&nbsp; Output the minimum number of coins with denominations 1, 5, 10 that changes 𝑚
++ *Input Format:* &nbsp;&nbsp; The input consists of a single integer m(1 ≤ m ≤ 10<sup>3</sup>)
++ *Output Format:* &nbsp;&nbsp; Output the minimum number of coins with denominations 1, 5, 10 that changes m
 
 ```python
 import sys
@@ -28,7 +28,7 @@ if __name__ == '__main__':
 *Question 2*
 + *Introduction:* &nbsp;&nbsp; A thief finds much more loot than his bag can fit. Help him to find the most valuable combination of items assuming that any fraction of a loot item can be put into his bag.
 + *Task:* &nbsp;&nbsp; The goal of this code problem is to implement an algorithm for the fractional knapsack problem.
-+ *Input Format:* &nbsp;&nbsp; The first line of the input contains the number 𝑛 of items and the capacity 𝑊 of a knapsack. The next 𝑛 lines define the values and weights of the items. The 𝑖-th line contains integers 𝑣𝑖 and 𝑤𝑖—the value and the weight of 𝑖-th item, respectively(1 ≤ 𝑛 ≤ 10<sup>3</sup>, 0 ≤ 𝑊 ≤ 2 · 10<sup>6</sup>; 0 ≤ 𝑣𝑖 ≤ 2 · 10<sup>6</sup>, 0 < 𝑤𝑖 ≤ 2 · 10<sup>6</sup> for all 1 ≤ 𝑖 ≤ 𝑛. All the numbers are integers)
++ *Input Format:* &nbsp;&nbsp; The first line of the input contains the number n of items and the capacity W of a knapsack. The next n lines define the values and weights of the items. The i-th line contains integers v<sub>i</sub> and w<sub>i</sub>—the value and the weight of i-th item, respectively(1 ≤ n ≤ 10<sup>3</sup>, 0 ≤ W ≤ 2 · 10<sup>6</sup>; 0 ≤ v<sub>i</sub> ≤ 2 · 10<sup>6</sup>, 0 < w<sub>i</sub> ≤ 2 · 10<sup>6</sup> for all 1 ≤ i ≤ n. All the numbers are integers)
 + *Output Format:* &nbsp;&nbsp; Output the maximal value of fractions of items that fit into the knapsack.
 
 ```python
@@ -56,10 +56,10 @@ if __name__ == "__main__":
 ```
 
 *Question 3*
-+ *Introduction:* &nbsp;&nbsp; You have 𝑛 ads to place on a popular Internet page. For each ad, you know how much is the advertiser willing to pay for one click on this ad. You have set up 𝑛 slots on your page and estimated the expected number of clicks per day for each slot. Now, your goal is to distribute the ads among the slots to maximize the total revenue.
-+ *Task:* &nbsp;&nbsp; Given two sequences 𝑎1, 𝑎2, . . . , 𝑎𝑛 (𝑎𝑖 is the profit per click of the 𝑖-th ad) and 𝑏1, 𝑏2, . . . , 𝑏𝑛 (𝑏𝑖 is the average number of clicks per day of the 𝑖-th slot), we need to partition them into 𝑛 pairs (𝑎𝑖, 𝑏𝑗 ) such that the sum of their products is maximized.
-+ *Input Format:* &nbsp;&nbsp; The first line contains an integer 𝑛, the second one contains a sequence of integers 𝑎1, 𝑎2, . . . , 𝑎𝑛, the third one contains a sequence of integers 𝑏1, 𝑏2, . . . , 𝑏𝑛(1 ≤ 𝑛 ≤ 10<sup>3</sup>; −10<sup>5</sup> ≤ 𝑎𝑖, 𝑏𝑖 ≤ 10<sup>5</sup> for all 1 ≤ 𝑖 ≤ 𝑛.)
-+ *Output Format:* &nbsp;&nbsp; Output the maximum value of $$\sum_{i=1}^n a_i c_i$$, where 𝑐1, 𝑐2, . . . , 𝑐𝑛 is a permutation of 𝑏1, 𝑏2, . . . , 𝑏𝑛.
++ *Introduction:* &nbsp;&nbsp; You have n ads to place on a popular Internet page. For each ad, you know how much is the advertiser willing to pay for one click on this ad. You have set up n slots on your page and estimated the expected number of clicks per day for each slot. Now, your goal is to distribute the ads among the slots to maximize the total revenue.
++ *Task:* &nbsp;&nbsp; Given two sequences a<sub>1</sub>, a<sub>2</sub>, . . . , a<sub>n</sub> (a<sub>i</sub> is the profit per click of the i-th ad) and b<sub>1</sub>, b<sub>2</sub>, . . . , b<sub>n</sub> (b<sub>i</sub> is the average number of clicks per day of the i-th slot), we need to partition them into n pairs ((a<sub>i</sub>, b<sub>j</sub> ) such that the sum of their products is maximized.
++ *Input Format:* &nbsp;&nbsp; The first line contains an integer n, the second one contains a sequence of integers a<sub>1</sub>, a<sub>2</sub>, . . . , a<sub>n</sub>, the third one contains a sequence of integers b<sub>1</sub>, b<sub>2</sub>, . . . , b<sub>n</sub>(1 ≤ n ≤ 10<sup>3</sup>; −10<sup>5</sup> ≤ a<sub>i</sub>, b<sub>i</sub> ≤ 10<sup>5</sup> for all 1 ≤ i ≤ n.)
++ *Output Format:* &nbsp;&nbsp; Output the maximum value of $$\sum_{i=1}^n a_i c_i$$, where c<sub>1</sub>, c<sub>2</sub>, . . . , c<sub>n</sub> is a permutation of b<sub>1</sub>, b<sub>2</sub>, . . . , b<sub>n</sub>.
 
 ```python
 import sys
