@@ -9,4 +9,6 @@ RNN（Recurrent Neural Network）是用于处理序列数据的神经网络，�
 
 $$\bar{s}_t=\Phi(\bar{x}_tW_x+\bar{s}_{t-1}W_s)$$
 
-$$\bar{s}'_t$$
+$$\bar{s}'_t=\Phi(\bar{s}_tW_y+\bar{s}'_{t-1}W_s)$$
+
+$$\bar{O}_t=\bar{s}'_tW_y$$
