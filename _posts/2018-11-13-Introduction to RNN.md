@@ -40,3 +40,13 @@ date: 2018-11-13
    <img src="/img/lstm2.PNG">
 
 4. 计算当前单元的cell state
+
+   <img src="/img/lstm3.PNG">
+
+5. 输出门(output gate)表示当前单元的输出值
+
+   <img src="/img/lstm4.PNG">
+
+#### GRU(Gated Recurrent Unit)是另一个比较常用的变体，它的网络结构如下图所示
+
+<img src="/img/gru.PNG">
