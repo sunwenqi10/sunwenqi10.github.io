@@ -12,8 +12,10 @@ RNN（Recurrent Neural Network）是用于处理序列数据的神经网络，�
 
 权重矩阵的计算使用BPTT算法，它的本质还是BP算法，只不过要加上基于时间的反向传播，以下图一个简单的网络为例，其中$$\bar{y}_3$$表示输出，$$\bar{d}_3$$表示实际值，$$E_3$$表示损失函数
 
-<img src="/img/rnn1.PNG">
+<img src="/img/rnn1.png">
 
 根据链式求导法则:
-+ $$\frac{\partial{E_3}}{\partial{W_y}}=\frac{\partial{E_3}}{\partial{\bar{y}_3}}\frac{\partial{\bar{y}_3}}{\partial{W_y}}$$
-+ 
+
+(1)  $$\frac{\partial{E_3}}{\partial{W_y}}=\frac{\partial{E_3}}{\partial{\bar{y}_3}}\frac{\partial{\bar{y}_3}}{\partial{W_y}}$$
+
+(2) $$$$
