@@ -4,7 +4,7 @@ title: "循环神经网络RNN介绍"
 tags: [深度学习]
 date: 2018-11-13
 ---
-RNN（Recurrent Neural Network）是用于处理序列数据的神经网络，它的网络结构如下图所示
+#### RNN（Recurrent Neural Network）是用于处理序列数据的神经网络，它的网络结构如下图所示
 
 <img src="/img/rnn.PNG">
 
@@ -24,4 +24,11 @@ RNN（Recurrent Neural Network）是用于处理序列数据的神经网络，�
 
 由上述公式可以很容易看出时间步长间隔越多，在梯度计算中累乘的项数就越多，激活函数的导数相乘的次数就越多，越容易出现梯度消失现象，即当前时刻与多个时间步长之前的时刻之间的依赖关系在计算过程中被丢弃了
 + 激活函数选取relu，右侧导数恒为1，可以较好地解决梯度消失问题；但是若W没有很好地初始化，容易产生梯度爆炸问题，需使用梯度裁剪（如果梯度的范数大于某个给定值，将梯度同比收缩）解决
-+ RNN网络的一些变种（例如LSTM、GRU）可以较好地解决梯度消失问题，下面主要对LSTM进行介绍
++ RNN网络的一些变种（例如LSTM、GRU）可以较好地解决梯度消失问题
+
+#### 长短时记忆网络LSTM(Long Short Term Memory network)是常规RNN网络的一个变体，可以学习长时间间隔的依赖关系，以下总结主要参考[Understanding LSTM Networks](http://colah.github.io/posts/2015-08-Understanding-LSTMs/)
+
+<img src="/img/lstm.png">
+
+1. 一个LSTM单元有相应的cell state($$C_t$$)
+2. 
