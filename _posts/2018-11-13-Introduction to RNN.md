@@ -31,4 +31,8 @@ date: 2018-11-13
 <img src="/img/lstm.png">
 
 1. 一个LSTM单元有相应的cell state($$C_t$$)
-2. 
+2. 遗忘门(forget layer)表示前一个单元的cell state有多少进入到当前单元
+
+   <img src="/img/lstm1.png">
+
+3. 输入门(input gate)表示有多少新的信息进入当前单元
