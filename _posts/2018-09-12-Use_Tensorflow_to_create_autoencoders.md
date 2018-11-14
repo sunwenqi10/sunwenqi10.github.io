@@ -129,6 +129,7 @@ date: 2018-09-12
     + 同上但feature map的个数由16-8-8-8-8-16变为32-32-16-16-32-32
   + 训练网络
   ```python
+  sess = tf.Session()
   epochs = 100
   batch_size = 200
   # Set's how much noise we're adding to the MNIST images
