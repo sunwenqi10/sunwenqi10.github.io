@@ -26,7 +26,7 @@ int_to_vocab = dict(enumerate(vocab))
 encoded = np.array([vocab_to_int[c] for c in text], dtype=np.int32)
 ```
 
-2. 将编码后的文本转换成输入，每一个输入的batch为一个N*M*I的三维矩阵，其中N为batch size，M为sequence length（RNN处理的序列长度num_steps），I为编码后的字符进行one-hot encode之后的长度（len(vocab)）
+2. 将编码后的文本转换成输入，每一个输入的batch为一个NxMxI的三维矩阵，其中N为batch size，M为sequence length（RNN处理的序列长度num_steps），I为编码后的字符进行one-hot encode之后的长度（len(vocab)）
 ```python
 import tensorflow as tf
 def get_batches(arr, batch_size, num_steps):
