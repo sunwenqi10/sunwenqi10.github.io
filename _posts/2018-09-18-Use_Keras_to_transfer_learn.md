@@ -44,7 +44,7 @@ def data_generator(path, sz, bs, mode):
           #zoom_range对图像内容进行缩放，但不改变图像尺寸
           datagen = ImageDataGenerator(preprocessing_function=preprocess_input,shear_range=0.1, zoom_range=0.1, \
                                        rotation_range=10, horizontal_flip=True)
-          generator = datagen.flow_from_directory(path, target_size=(sz, sz), batch_size=bs, class_mode='categorical')
+          generator = datagen.flow_from_directory(path, shuffle=True, target_size=(sz, sz), batch_size=bs, class_mode='categorical')
       else:
           datagen = ImageDataGenerator() if mode=='plot' else ImageDataGenerator(preprocessing_function=preprocess_input)
           generator = datagen.flow_from_directory(path, shuffle=False, target_size=(sz, sz), batch_size=bs, \
