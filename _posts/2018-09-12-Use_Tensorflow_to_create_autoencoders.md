@@ -161,6 +161,7 @@ date: 2018-09-12
               ax.get_xaxis().set_visible(False)
               ax.get_yaxis().set_visible(False)
   fig.tight_layout(pad=0.1)
+  sess.close()
   ```
 
 <img src="/img/denoising.png" hspace="90">
