@@ -155,8 +155,7 @@ class CharRNN:
   learning_rate = 0.001   
   keep_prob = 0.5 #Dropout keep probability
   ### Create RNN network
-  model = CharRNN(batch_size=batch_size, num_steps=num_steps, lstm_size=lstm_size, \
-                     num_layers=num_layers, learning_rate=learning_rate)
+  model = CharRNN(batch_size=batch_size, num_steps=num_steps, lstm_size=lstm_size, num_layers=num_layers, learning_rate=learning_rate)
   ```
 
 8. 训练RNN
