@@ -85,7 +85,7 @@ def build_output(lstm_output, lstm_size):
        ###------------------------------------------------------------------------
        # Reshape output so it's a bunch of rows
        # That is, the shape should be batch_size*num_steps rows by lstm_size columns
-       x = tf.reshape(lstm_output, [-1, in_size])    
+       x = tf.reshape(lstm_output, [-1, lstm_size])    
        # Connect the RNN outputs to a softmax layer
        with tf.variable_scope('softmax'): #avoid variable name conflict  
            softmax_w = tf.Variable(tf.truncated_normal((lstm_size, len(vocab)), stddev=0.1))
@@ -116,3 +116,49 @@ def build_optimizer(loss, learning_rate, grad_clip):
 ```
 
 7. 建立RNN
+```python
+class CharRNN:  
+       def __init__(self, batch_size=64, num_steps=50, lstm_size=128, \
+                    num_layers=2, learning_rate=0.001, grad_clip=5, sampling=False):
+           # When we're using this network for sampling later, we'll be passing in
+           # one character at a time, so providing an option for that
+           if sampling == True:
+               batch_size, num_steps = 1, 1
+           else:
+               batch_size, num_steps = batch_size, num_steps
+           tf.reset_default_graph()
+           # Build the input placeholder tensors
+           self.inputs, self.targets, self.keep_prob = build_inputs(batch_size, num_steps)
+           # Build the LSTM cell
+           cell, self.initial_state = build_lstm(lstm_size, num_layers, batch_size, self.keep_prob)
+           # Run each sequence step through the RNN and collect the outputs
+           outputs, state = tf.nn.dynamic_rnn(cell, self.inputs, initial_state=self.initial_state)
+           self.final_state = state
+           # Get softmax predictions and logits
+           self.prediction, self.logits = build_output(outputs, lstm_size)
+           # Loss and optimizer (with gradient clipping)
+           self.loss = build_loss(self.logits, self.targets)
+           self.optimizer = build_optimizer(self.loss, learning_rate, grad_clip)
+```
+
+8. 超参数设置
+  + num_layers一般设为2或3，lstm_size需根据数据量的大小确定
+  + 具体到该网络，要保证模型没有欠拟合，需要训练的参数个数最好和训练文本的总字符数在同一量级上（1MB的文件大约有100万个字符）
+  + 若训练过程中产生过拟合可以减小keep_prob或减小lstm_size
+  + 一个比较好的策略是在计算条件允许的情况下选择尽可能大的网络结构，同时尝试不同的dropout概率，选择使validation loss最小的那个
+  + 按照如下设置，该网络需训练的参数个数为$${[{(83+512)}\times{512}+512]}\times{4}=$$（len(vocab)=83, 训练文本的大小约为2MB）
+  ```python
+  batch_size = 100        
+  num_steps = 100        
+  lstm_size = 512         
+  num_layers = 2         
+  learning_rate = 0.001   
+  keep_prob = 0.5 #Dropout keep probability
+  ### Create RNN network
+  model = CharRNN(batch_size=batch_size, num_steps=num_steps, lstm_size=lstm_size, \
+                     num_layers=num_layers, learning_rate=learning_rate)
+  ```
+
+8. 训练RNN
+```python
+```
