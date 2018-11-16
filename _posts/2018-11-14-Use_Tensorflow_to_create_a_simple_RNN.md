@@ -56,7 +56,7 @@ def build_inputs(batch_size, num_steps):
        # Declare placeholders we'll feed into the graph
        inputs = tf.placeholder(tf.int32, [batch_size, num_steps, len(vocab)], name='inputs')
        targets = tf.placeholder(tf.int32, [batch_size, num_steps, len(vocab)], name='targets')    
-       # Keep probability placeholder for drop out layers
+       # Keep probability placeholder for dropout layers
        keep_prob = tf.placeholder(tf.float32, name='keep_prob')
        return inputs, targets, keep_prob
 ```
@@ -158,6 +158,72 @@ class CharRNN:
   model = CharRNN(batch_size=batch_size, num_steps=num_steps, lstm_size=lstm_size, num_layers=num_layers, learning_rate=learning_rate)
   ```
 
-8. 训练RNN
+9. 训练RNN
 ```python
+epochs = 20
+# Print losses every N interations
+print_every_n = 50
+# Save every N iterations
+save_every_n = 200
+saver = tf.train.Saver(max_to_keep=100)
+### train
+with tf.Session() as sess:
+       sess.run(tf.global_variables_initializer())   
+       counter = 0
+       for e in range(epochs):
+           new_state = sess.run(model.initial_state)
+           loss = 0
+           for x, y in get_batches(encoded, batch_size, num_steps):
+               counter += 1
+               feed = {model.inputs: x, model.targets: y, \
+                       model.keep_prob: keep_prob, model.initial_state: new_state}
+               batch_loss, new_state, _ = sess.run([model.loss, model.final_state, model.optimizer], feed_dict=feed)
+               if (counter % print_every_n == 0):
+                   print('Epoch: {}/{}... '.format(e+1, epochs), \
+                         'Training Step: {}... '.format(counter), \
+                         'Training loss: {:.4f}... '.format(batch_loss))
+               if (counter % save_every_n == 0):
+                   saver.save(sess, "checkpoints/i{}_l{}.ckpt".format(counter, lstm_size))
+       saver.save(sess, "checkpoints/i{}_l{}.ckpt".format(counter, lstm_size))
+```
+
+10. 使用建立的RNN进行预测
+```python
+### 从预测概率最高的n个字符中选取最终的预测字符
+def pick_top_n(preds, vocab_size, top_n=5):
+    p = np.squeeze(preds) #(1,1,vocab_size) to (vocab_size,)
+    p[np.argsort(p)[:-top_n]] = 0
+    p = p / np.sum(p)
+    c = np.random.choice(vocab_size, 1, p=p)[0]
+    return c
+### 预测字符    
+def sample(checkpoint, n_samples, lstm_size, prime="The "):
+        samples = [c for c in prime] #the start characters
+        model = CharRNN(lstm_size=lstm_size, sampling=True)
+        saver = tf.train.Saver()
+        with tf.Session() as sess:
+            saver.restore(sess, checkpoint)
+            new_state = sess.run(model.initial_state)
+            x = np.zeros((1, 1))
+            for c in prime:
+                x[0,0] = vocab_to_int[c]
+                x_one_hot = tf.one_hot(x, len(vocab))
+                feed = {model.inputs: x_one_hot, model.keep_prob: 1., model.initial_state: new_state}
+                preds, new_state = sess.run([model.prediction, model.final_state], feed_dict=feed)
+            c = pick_top_n(preds, len(vocab))
+            samples.append(int_to_vocab[c])
+
+            for i in range(n_samples-1):
+                x[0,0] = c
+                x_one_hot = tf.one_hot(x, len(vocab))
+                feed = {model.inputs: x_one_hot, model.keep_prob: 1., model.initial_state: new_state}
+                preds, new_state = sess.run([model.prediction, model.final_state], feed_dict=feed)
+                c = pick_top_n(preds, len(vocab))
+                samples.append(int_to_vocab[c])
+
+        return ''.join(samples)
+### 获得预测结果
+checkpoint = tf.train.latest_checkpoint('checkpoints')
+samp = sample(checkpoint, 2000, lstm_size, prime="Far") #预测"Far"之后的2000个字符
+print(samp)
 ```
