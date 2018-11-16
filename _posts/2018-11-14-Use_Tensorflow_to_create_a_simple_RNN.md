@@ -191,11 +191,11 @@ with tf.Session() as sess:
 ```python
 ### 从预测概率最高的n个字符中选取最终的预测字符
 def pick_top_n(preds, vocab_size, top_n=5):
-    p = np.squeeze(preds) #(1,1,vocab_size) to (vocab_size,)
-    p[np.argsort(p)[:-top_n]] = 0
-    p = p / np.sum(p)
-    c = np.random.choice(vocab_size, 1, p=p)[0]
-    return c
+        p = np.squeeze(preds) #(1,1,vocab_size) to (vocab_size,)
+        p[np.argsort(p)[:-top_n]] = 0
+        p = p / np.sum(p)
+        c = np.random.choice(vocab_size, 1, p=p)[0]
+        return c
 ### 预测字符    
 def sample(checkpoint, n_samples, lstm_size, prime="The "):
         samples = [c for c in prime] #the start characters
