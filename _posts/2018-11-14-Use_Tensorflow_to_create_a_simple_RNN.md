@@ -26,7 +26,7 @@ int_to_vocab = dict(enumerate(vocab))
 encoded = np.array([vocab_to_int[c] for c in text], dtype=np.int32)
 ```
 
-2. 将编码后的文本转换成输入，每一个输入的batch为一个NxMxI的三维矩阵，其中N为batch size，M为sequence length（RNN处理的序列长度num_steps），I为编码后的字符进行one-hot encode之后的长度（len(vocab)）
+2. 将编码后的文本转换成输入，每一个输入的batch为一个NxM的二维矩阵，其中N为batch size，M为sequence length（RNN处理的序列长度num_steps）
 ```python
 import tensorflow as tf
 def get_batches(arr, batch_size, num_steps):
@@ -45,17 +45,15 @@ def get_batches(arr, batch_size, num_steps):
            y = np.zeros(x.shape, dtype=x.dtype)
            y[:,:y_temp.shape[1]] = y_temp
 
-           x_one_hot = tf.one_hot(x, len(vocab))
-           y_one_hot = tf.one_hot(y, len(vocab))
-           yield x_one_hot, y_one_hot
+           yield x, y
 ```
 
 3. 建立RNN的输入层
 ```python
 def build_inputs(batch_size, num_steps):
        # Declare placeholders we'll feed into the graph
-       inputs = tf.placeholder(tf.int32, [batch_size, num_steps, len(vocab)], name='inputs')
-       targets = tf.placeholder(tf.int32, [batch_size, num_steps, len(vocab)], name='targets')    
+       inputs = tf.placeholder(tf.int32, [batch_size, num_steps], name='inputs')
+       targets = tf.placeholder(tf.int32, [batch_size, num_steps], name='targets')    
        # Keep probability placeholder for dropout layers
        keep_prob = tf.placeholder(tf.float32, name='keep_prob')
        return inputs, targets, keep_prob
@@ -100,8 +98,10 @@ def build_output(lstm_output, lstm_size):
 ```python
 ### build loss function
 def build_loss(logits, targets):
+       # one-hot encode the targets，from 2D (batch_size, num_steps) to 3D (batch_size, num_steps, len(vocab))
+       y_one_hot = tf.one_hot(targets, len(vocab))
        # reshape to match logits, one row per batch_size per num_steps
-       y_reshaped = tf.reshape(targets, logits.get_shape())
+       y_reshaped = tf.reshape(y_one_hot, logits.get_shape())
        # Softmax cross entropy loss
        loss = tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_reshaped)
        loss = tf.reduce_mean(loss)
@@ -131,8 +131,10 @@ class CharRNN:
            self.inputs, self.targets, self.keep_prob = build_inputs(batch_size, num_steps)
            # Build the LSTM cell
            cell, self.initial_state = build_lstm(lstm_size, num_layers, batch_size, self.keep_prob)
+           # One-hot encode the inputs, from 2D (batch_size, num_steps) to 3D (batch_size, num_steps, len(vocab))
+           x_one_hot = tf.one_hot(self.inputs, len(vocab))
            # Run each sequence step through the RNN and collect the outputs
-           outputs, state = tf.nn.dynamic_rnn(cell, self.inputs, initial_state=self.initial_state)
+           outputs, state = tf.nn.dynamic_rnn(cell, x_one_hot, initial_state=self.initial_state)
            self.final_state = state
            # Get softmax predictions and logits
            self.prediction, self.logits = build_output(outputs, lstm_size)
@@ -207,16 +209,14 @@ def sample(checkpoint, n_samples, lstm_size, prime="The "):
             x = np.zeros((1, 1))
             for c in prime:
                 x[0,0] = vocab_to_int[c]
-                x_one_hot = tf.one_hot(x, len(vocab))
-                feed = {model.inputs: x_one_hot, model.keep_prob: 1., model.initial_state: new_state}
+                feed = {model.inputs: x, model.keep_prob: 1., model.initial_state: new_state}
                 preds, new_state = sess.run([model.prediction, model.final_state], feed_dict=feed)
             c = pick_top_n(preds, len(vocab))
             samples.append(int_to_vocab[c])
 
             for i in range(n_samples-1):
                 x[0,0] = c
-                x_one_hot = tf.one_hot(x, len(vocab))
-                feed = {model.inputs: x_one_hot, model.keep_prob: 1., model.initial_state: new_state}
+                feed = {model.inputs: x, model.keep_prob: 1., model.initial_state: new_state}
                 preds, new_state = sess.run([model.prediction, model.final_state], feed_dict=feed)
                 c = pick_top_n(preds, len(vocab))
                 samples.append(int_to_vocab[c])
