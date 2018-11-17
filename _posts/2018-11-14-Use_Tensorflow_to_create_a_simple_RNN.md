@@ -40,11 +40,11 @@ def get_batches(arr, batch_size, num_steps):
            # The features
            x = arr[:, n:n+num_steps]
            # The targets, shifted by one
-           y_temp = arr[:, n+1:n+num_steps+1]
-           # For the very last batch, use zero to fill in the end of y     
+           # For the very last batch, use zero to fill in the end of the targets
+           y_temp = arr[:, n+1:n+num_steps+1]                
            y = np.zeros(x.shape, dtype=x.dtype)
            y[:,:y_temp.shape[1]] = y_temp
-
+           #iterator
            yield x, y
 ```
 
