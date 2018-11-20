@@ -11,7 +11,7 @@ date: 2018-11-20
 
 <img src="/img/embed.png">
 
-### sentiment analysis
+### Sentiment Analysis
 
 使用的数据[下载](https://pan.baidu.com/s/16tNfl50mGiga654M8tGKWQ)，其中reviews.txt中已将大写字母全部转化为小写字母
 
