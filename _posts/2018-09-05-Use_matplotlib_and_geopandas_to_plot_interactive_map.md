@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "使用matplotlib和geopandas画交互式地图"
-tags: [Python]
+tags: [气象]
 date: 2018-09-05
 ---
 

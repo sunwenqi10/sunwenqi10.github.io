@@ -145,3 +145,5 @@ with tf.Session(graph=graph) as sess:
            test_acc.append(batch_acc)
        print("Test accuracy: {:.3f}".format(np.mean(test_acc)))
 ```
+
+### Word2Vec
