@@ -49,6 +49,99 @@ seq_len = 200
 features = np.zeros((len(reviews_ints), seq_len), dtype=int)
 for i, row in enumerate(reviews_ints):
        features[i, -len(row):] = np.array(row)[:seq_len]
+### 拆分训练、验证和测试集
+split_frac = 0.8
+split_idx = int(len(features)*0.8)
+train_x, val_x = features[:split_idx], features[split_idx:]
+train_y, val_y = labels[:split_idx], labels[split_idx:]
+test_idx = int(len(val_x)*0.5)
+val_x, test_x = val_x[:test_idx], val_x[test_idx:]
+val_y, test_y = val_y[:test_idx], val_y[test_idx:]
 ```
 
 2. 搭建网络
+```python
+### 超参数设置
+lstm_size = 256
+lstm_layers = 1
+batch_size = 500
+learning_rate = 0.001
+embed_size = 300 #Size of the embedding vectors(number of units in the embedding layer)
+### Input
+graph = tf.Graph() #Create the graph object
+with graph.as_default():
+    inputs_ = tf.placeholder(tf.int32, [None, None], name='inputs')
+    labels_ = tf.placeholder(tf.int32, [None, None], name='labels')
+    keep_prob = tf.placeholder(tf.float32, name='keep_prob')
+### Embed Layer
+n_words = len(vocab_to_int) + 1 #Adding 1 because we use 0's for padding, dictionary started at 1
+with graph.as_default():
+       embedding = tf.Variable(tf.random_uniform((n_words, embed_size), -1, 1))
+       embed = tf.nn.embedding_lookup(embedding, inputs_) #3D tensor (batch_size, seq_len, embed_size)
+### LSTM Layer
+with graph.as_default():
+       lstm = tf.contrib.rnn.BasicLSTMCell(lstm_size)    
+       drop = tf.contrib.rnn.DropoutWrapper(lstm, output_keep_prob=keep_prob)
+       cell = tf.contrib.rnn.MultiRNNCell([drop] * lstm_layers)
+       initial_state = cell.zero_state(batch_size, tf.float32) #Getting an initial state
+### Output layer
+with graph.as_default():
+       outputs, final_state = tf.nn.dynamic_rnn(cell, embed, initial_state=initial_state)
+       predictions = tf.contrib.layers.fully_connected(outputs[:, -1], 1, activation_fn=tf.sigmoid) #从最后一步的输出(batch_size, lstm_size)建立全连接层
+### Loss function and Optimizer
+with graph.as_default():
+       cost = tf.losses.mean_squared_error(labels_, predictions)  
+       optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost)
+### Validation and Test Accuracy
+with graph.as_default():
+       correct_pred = tf.equal(tf.cast(tf.round(predictions), tf.int32), labels_)
+       accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+```
+
+3. 训练网络
+```python
+def get_batches(x, y, batch_size=100):    
+       n_batches = len(x)//batch_size
+       x, y = x[:n_batches*batch_size], y[:n_batches*batch_size]
+       for ii in range(0, len(x), batch_size):
+           yield x[ii:ii+batch_size], y[ii:ii+batch_size]
+### Train and Validation
+epochs = 10
+with graph.as_default():
+       saver = tf.train.Saver()
+with tf.Session(graph=graph) as sess:
+       sess.run(tf.global_variables_initializer())
+       iteration = 1
+       for e in range(epochs):
+           state = sess.run(initial_state)        
+           for x, y in get_batches(train_x, train_y, batch_size):
+               feed = {inputs_: x, labels_: y[:, None], keep_prob: 0.5, initial_state: state}
+               loss, state, _ = sess.run([cost, final_state, optimizer], feed_dict=feed)            
+               if iteration%5==0:
+                   print("Epoch: {}/{}".format(e, epochs), \
+                         "Iteration: {}".format(iteration), \
+                         "Train loss: {:.3f}".format(loss))
+               if iteration%25==0:
+                   val_acc = []
+                   val_state = sess.run(cell.zero_state(batch_size, tf.float32))
+                   for xv, yv in get_batches(val_x, val_y, batch_size):
+                       feed = {inputs_: xv, labels_: yv[:, None], keep_prob: 1, initial_state: val_state}
+                       batch_acc, val_state = sess.run([accuracy, final_state], feed_dict=feed)
+                       val_acc.append(batch_acc)
+                   print("Val acc: {:.3f}".format(np.mean(val_acc)))
+               iteration += 1
+       saver.save(sess, "checkpoints/sentiment.ckpt")
+```
+
+4. 检验网络
+```python
+test_acc = []
+with tf.Session(graph=graph) as sess:
+       saver.restore(sess, tf.train.latest_checkpoint('checkpoints'))
+       test_state = sess.run(cell.zero_state(batch_size, tf.float32))
+       for xt, yt in get_batches(test_x, test_y, batch_size):
+           feed = {inputs_: xt, labels_: yt[:, None], keep_prob: 1, initial_state: test_state}
+           batch_acc, test_state = sess.run([accuracy, final_state], feed_dict=feed)
+           test_acc.append(batch_acc)
+       print("Test accuracy: {:.3f}".format(np.mean(test_acc)))
+```
