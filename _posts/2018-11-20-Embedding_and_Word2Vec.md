@@ -38,6 +38,7 @@ reviews_ints = []
 for each in reviews:
        reviews_ints.append([vocab_to_int[word] for word in each.split()])
 ### 将标签转化为整数
+import numpy as np
 labels = labels.split('\n')
 labels = np.array([1 if each == 'positive' else 0 for each in labels])
 ### 去掉长度为0的评论
@@ -68,6 +69,7 @@ batch_size = 500
 learning_rate = 0.001
 embed_size = 300 #Size of the embedding vectors(number of units in the embedding layer)
 ### Input
+import tensorflow as tf
 graph = tf.Graph() #Create the graph object
 with graph.as_default():
     inputs_ = tf.placeholder(tf.int32, [None, None], name='inputs')
@@ -147,3 +149,55 @@ with tf.Session(graph=graph) as sess:
 ```
 
 ### Word2Vec
+
+Word2Vec是可以结合上下文语义生成词向量的一种算法，经常在相同语义下出现的词语，它们生成的词向量也很相似（如下图所示），本文所使用的训练数据是Matt Mahoney整理的[维基百科文章](http://mattmahoney.net/dc/text8.zip)
+
+<img src="/img/wordvec.PNG">
+
+Word2Vec主要有两种架构形式，分别为CBOW(Continuous Bag-Of-Words)和Skip-gram，两种方法的架构如下图所示。CBOW是用周围词预测中心词，从而利用中心词的预测结果情况，不断地去调整周围词的向量；Skip-gram是用中心词来预测周围的词，利用周围的词的预测结果情况，不断地调整中心词的词向量。本文主要对Skip-gram进行介绍。
+
+<img src="/img/wordvec1.PNG">
+
+1. 数据前处理
+```python
+from collections import Counter
+def process(text):
+       text = text.lower()
+       ### Replace punctuation with tokens so we can use them in our model
+       text = text.replace('.', ' <PERIOD> ')
+       text = text.replace(',', ' <COMMA> ')
+       text = text.replace('"', ' <QUOTATION_MARK> ')
+       text = text.replace(';', ' <SEMICOLON> ')
+       text = text.replace('!', ' <EXCLAMATION_MARK> ')
+       text = text.replace('?', ' <QUESTION_MARK> ')
+       text = text.replace('(', ' <LEFT_PAREN> ')
+       text = text.replace(')', ' <RIGHT_PAREN> ')
+       text = text.replace('--', ' <HYPHENS> ')
+       text = text.replace(':', ' <COLON> ')    
+       ### Remove all words with  5 or fewer occurences
+       words = text.split()
+       word_counts = Counter(words)
+       trimmed_words = [word for word in words if word_counts[word] > 5]
+       return trimmed_words
+### 读取并处理数据    
+with open('data/text8') as f:
+       text = f.read()
+words = process(text)
+### 将单词编码为整数
+word_counts = Counter(words)
+sorted_vocab = sorted(word_counts, key=word_counts.get, reverse=True)
+int_to_vocab = {ii: word for ii, word in enumerate(sorted_vocab)}
+vocab_to_int = {word: ii for ii, word in int_to_vocab.items()}
+int_words = [vocab_to_int[word] for word in words]
+### 随机去掉一些高频词(例如the)
+### for each word in the training data, discard the word with probability 1-sqrt(threshold/word frequency)
+import random
+threshold = 1e-5
+word_counts = Counter(int_words)
+total_count = len(int_words)
+freqs = {word: count/total_count for word, count in word_counts.items()}
+p_drop = {word: 1 - np.sqrt(threshold/freqs[word]) for word in word_counts}
+train_words = [word for word in int_words if random.random() < (1 - p_drop[word])]
+```
+
+2. 获取batch
