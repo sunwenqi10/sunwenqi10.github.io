@@ -154,9 +154,13 @@ Word2Vec是可以结合上下文语义生成词向量的一种算法，经常在
 
 <img src="/img/wordvec.PNG">
 
-Word2Vec主要有两种架构形式，分别为CBOW(Continuous Bag-Of-Words)和Skip-gram，两种方法的架构如下图所示。CBOW是用周围词预测中心词，从而利用中心词的预测结果情况，不断地去调整周围词的向量；Skip-gram是用中心词来预测周围的词，利用周围的词的预测结果情况，不断地调整中心词的词向量。本文主要对Skip-gram进行介绍。
+Word2Vec主要有两种架构形式，分别为CBOW(Continuous Bag-Of-Words)和Skip-gram，两种方法的示意图如下图所示。CBOW是用周围词预测中心词，从而利用中心词的预测结果情况，不断地去调整周围词的向量；Skip-gram是用中心词来预测周围的词，利用周围的词的预测结果情况，不断地调整中心词的词向量。
 
 <img src="/img/wordvec1.PNG">
+
+本文主要对Skip-gram进行介绍，采用的网络结构如下图所示。
+
+<img src="/img/wordvec2.png">
 
 1. 数据前处理
 ```python
@@ -189,7 +193,7 @@ sorted_vocab = sorted(word_counts, key=word_counts.get, reverse=True)
 int_to_vocab = {ii: word for ii, word in enumerate(sorted_vocab)}
 vocab_to_int = {word: ii for ii, word in int_to_vocab.items()}
 int_words = [vocab_to_int[word] for word in words]
-### 随机去掉一些高频词(例如the)
+### Subsampling, 随机去掉一些高频词(例如the)
 ### for each word in the training data, discard the word with probability 1-sqrt(threshold/word frequency)
 import random
 threshold = 1e-5
@@ -201,3 +205,62 @@ train_words = [word for word in int_words if random.random() < (1 - p_drop[word]
 ```
 
 2. 获取batch
+```python
+### 找到所要训练的单词周围的单词
+def get_target(words, idx, window_size=5):
+       ### Get a list of words in a window around an index  
+       R = np.random.randint(1, window_size+1)
+       start = idx - R if (idx - R) > 0 else 0
+       stop = idx + R
+       target_words = set(words[start:idx] + words[idx+1:stop+1])   
+       return list(target_words)
+def get_batches(words, batch_size, window_size=5):
+       ### Create a generator of word batches as a tuple (inputs, targets)
+       ### inputs(or targets) is a list of integers
+       n_batches = len(words)//batch_size                    
+       words = words[:n_batches*batch_size] #only full batches           
+       for idx in range(0, len(words), batch_size):
+           x, y = [], []
+           batch = words[idx:idx+batch_size]
+           for ii in range(len(batch)):
+               batch_x = batch[ii]
+               batch_y = get_target(batch, ii, window_size)
+               y.extend(batch_y)
+               x.extend([batch_x]*len(batch_y))
+           yield x, y
+```
+
+3. 搭建网络，结构如下图所示
+```python
+import tensorflow as tf
+train_graph = tf.Graph()
+### Input
+with train_graph.as_default():
+       inputs = tf.placeholder(tf.int32, [None], name='inputs')
+       labels = tf.placeholder(tf.int32, [None, None], name='labels')
+### Embed
+n_vocab = len(int_to_vocab)
+n_embedding = 200 #number of embedding features
+with train_graph.as_default():
+       embedding = tf.Variable(tf.random_uniform((n_vocab, n_embedding), -1, 1))
+       embed = tf.nn.embedding_lookup(embedding, inputs)
+### Negative Sampling
+### The size of our word vocabulary means that our skip-gram neural network has a tremendous number of weights
+### All of the weights would be updated slightly by every one of our training samples. This makes training the network very inefficient
+### With negative sampling, we are instead going to randomly select just a small number of “negative” words(for which we want the network to output a 0) to update the weights for
+### We will also still update the weights for our “positive” word((for which we want the network to output a 1)
+### Essentially, the probability for selecting a word as a negative sample is related to its frequency, with more frequent words being more likely to be selected as negative samples
+n_sampled = 100 #number of negative labels to sample
+with train_graph.as_default():
+    ### negative sampling is for training only
+    ### note the shape of softmax_w is (n_vocab, n_embedding)
+    ### if we want to calculate the full softmax loss, use:
+    ###       logits = tf.matmul(embed, tf.transpose(softmax_w))
+    ###       logits = tf.nn.bias_add(logits, softmax_b)
+    softmax_w = tf.Variable(tf.truncated_normal((n_vocab, n_embedding), stddev=0.1))
+    softmax_b = tf.Variable(tf.zeros(n_vocab))    
+    # Calculate the loss using negative sampling
+    loss = tf.nn.sampled_softmax_loss(softmax_w, softmax_b, labels, embed, n_sampled, n_vocab)
+    cost = tf.reduce_mean(loss)
+    optimizer = tf.train.AdamOptimizer().minimize(cost)
+```
