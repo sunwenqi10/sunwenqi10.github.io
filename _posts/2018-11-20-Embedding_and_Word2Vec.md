@@ -252,15 +252,58 @@ with train_graph.as_default():
 ### Essentially, the probability for selecting a word as a negative sample is related to its frequency, with more frequent words being more likely to be selected as negative samples
 n_sampled = 100 #number of negative labels to sample
 with train_graph.as_default():
-    ### negative sampling is for training only
-    ### note the shape of softmax_w is (n_vocab, n_embedding)
-    ### if we want to calculate the full softmax loss, use:
-    ###       logits = tf.matmul(embed, tf.transpose(softmax_w))
-    ###       logits = tf.nn.bias_add(logits, softmax_b)
-    softmax_w = tf.Variable(tf.truncated_normal((n_vocab, n_embedding), stddev=0.1))
-    softmax_b = tf.Variable(tf.zeros(n_vocab))    
-    # Calculate the loss using negative sampling
-    loss = tf.nn.sampled_softmax_loss(softmax_w, softmax_b, labels, embed, n_sampled, n_vocab)
-    cost = tf.reduce_mean(loss)
-    optimizer = tf.train.AdamOptimizer().minimize(cost)
+       ### negative sampling is for training only
+       ### note the shape of softmax_w is (n_vocab, n_embedding)
+       ### if we want to calculate the full softmax loss, use:
+       ###       logits = tf.matmul(embed, tf.transpose(softmax_w))
+       ###       logits = tf.nn.bias_add(logits, softmax_b)
+       softmax_w = tf.Variable(tf.truncated_normal((n_vocab, n_embedding), stddev=0.1))
+       softmax_b = tf.Variable(tf.zeros(n_vocab))    
+       loss = tf.nn.sampled_softmax_loss(softmax_w, softmax_b, labels, embed, n_sampled, n_vocab) #calculate the loss using negative sampling
+       cost = tf.reduce_mean(loss)
+       optimizer = tf.train.AdamOptimizer().minimize(cost)
+### Normalize each word's vector
+with train_graph.as_default():
+    norm = tf.sqrt(tf.reduce_sum(tf.square(embedding), 1, keep_dims=True))
+    normalized_embedding = embedding / norm
+```
+
+4. 训练和验证网络
+```python
+epochs = 10
+batch_size = 1000
+window_size = 10
+with train_graph.as_default():
+       saver = tf.train.Saver()
+with tf.Session(graph=train_graph) as sess:
+       iteration = 1
+       loss = 0
+       sess.run(tf.global_variables_initializer())
+       for e in range(1, epochs+1):
+           batches = get_batches(train_words, batch_size, window_size)
+           for x, y in batches:            
+               feed = {inputs: x, labels: np.array(y)[:, None]} #labels shoud be a 2D tensor (len(y), 1)
+               train_loss, _ = sess.run([cost, optimizer], feed_dict=feed)        
+
+               loss += train_loss           
+               if iteration % 100 == 0:
+                   print("Epoch {}/{}".format(e, epochs), \
+                         "Iteration: {}".format(iteration), \
+                         "Avg. Training loss: {:.4f}".format(loss/100))
+                   loss = 0
+
+               iteration += 1
+       save_path = saver.save(sess, "checkpoints/text8.ckpt")
+       ### 将每个单词的词向量
+       embed_mat = sess.run(normalized_embedding)
+### Use T-SNE to visualize word vectors
+import matplotlib.pyplot as plt
+from sklearn.manifold import TSNE
+viz_words = 500
+tsne = TSNE()
+embed_tsne = tsne.fit_transform(embed_mat[:viz_words, :])
+fig, ax = plt.subplots(figsize=(14, 14))
+for idx in range(viz_words):
+       plt.scatter(*embed_tsne[idx, :], color='steelblue')
+       plt.annotate(int_to_vocab[idx], (embed_tsne[idx, 0], embed_tsne[idx, 1]), alpha=0.7)
 ```
