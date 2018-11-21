@@ -264,8 +264,8 @@ with train_graph.as_default():
        optimizer = tf.train.AdamOptimizer().minimize(cost)
 ### Normalize each word's vector
 with train_graph.as_default():
-    norm = tf.sqrt(tf.reduce_sum(tf.square(embedding), 1, keep_dims=True))
-    normalized_embedding = embedding / norm
+       norm = tf.sqrt(tf.reduce_sum(tf.square(embedding), 1, keep_dims=True))
+       normalized_embedding = embedding / norm
 ```
 
 4. 训练和验证网络
@@ -294,7 +294,6 @@ with tf.Session(graph=train_graph) as sess:
 
                iteration += 1
        save_path = saver.save(sess, "checkpoints/text8.ckpt")
-       ### 将每个单词的词向量
        embed_mat = sess.run(normalized_embedding)
 ### Use T-SNE to visualize word vectors
 import matplotlib.pyplot as plt
