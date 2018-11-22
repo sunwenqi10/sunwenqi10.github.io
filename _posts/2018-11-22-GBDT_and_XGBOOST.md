@@ -17,4 +17,4 @@ GBDT算法的流程如下所示：
   + for k=1 to K: compute $$g_{m-1,ki}$$ for each sample $$(x_i, y_i)$$
   + for k=1 to K: build up regression tree $$R_{mkj}$$(j=1 to J<sub>mk</sub> refer to the leaf nodes) from training samples $$(x_i, g_{m-1,ki})_{i=1,...,N}$$
   + for k=1 to K: compute leaf weights $$w_{mkj}$$ for j=1 to J<sub>mk</sub>, $$w_{mkj}=argmin_{w}\sum_{x_i\in{R_{mkj}}}L(y_i, F_{m-1,1}(x_i), ..., F_{m-1,k}(x_i)+w, ...,  F_{m-1,K}(x_i))$$   
-  + for k=1 to K: $$F_{mk}(x)=F_{m-1,k}(x)+\sum_{j=1}^{J_{mk}}w_{mkj}I({x}\in{R_{mkj}})$$
+  + for k=1 to K: $$F_{mk}(x)=F_{m-1,k}(x)+\eta*\sum_{j=1}^{J_{mk}}w_{mkj}I({x}\in{R_{mkj}})$$, $$\eta$$为学习率
