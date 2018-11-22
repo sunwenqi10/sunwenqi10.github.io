@@ -17,4 +17,4 @@ GBDT算法的流程如下所示：
   + for k=1 to K: compute leaf weights $$w_{mkj}$$ for j=1 to J<sub>mk</sub>
   + for k=1 to K: $$F_{mk}(x)=F_{m-1,k}(x)+\sum_{j=1}^{J_{mk}}w_{mkj}I({x}\in{R_{mkj}})$$
 
-$$w_{mkj}=argmin_{w}\sum_{{i}\in{R_{mkj}}}L(y_i, F_{m-1,1}(x_i), ..., F_{m-1,k}(x_i)+w, ...,  F_{m-1,K}(x_i))$$   
+$$w_{mkj}=argmin_{w}\sum_{i\in{R_{mkj}}}L(y_i, F_{m-1,1}(x_i), ..., F_{m-1,k}(x_i)+w, ...,  F_{m-1,K}(x_i))$$   
