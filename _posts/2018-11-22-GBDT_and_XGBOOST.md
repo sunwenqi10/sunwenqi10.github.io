@@ -23,7 +23,7 @@ GBDT算法的流程如下所示：
 
 为了求得w的值，使上述公式的一阶导数为0，利用Newton-Raphson公式（在这个问题中将初始值设为0，只进行一步迭代，并且Hessian矩阵只取对角线上的值），记$$L_i=L(y_i, ...,   F_{m-1,k}(x_i)+\sum_{j=1}^{J_{mk}}w_{kj}I({x_i}\in{R_{mkj}}), ...)$$，有$$w_{mkj}=-\frac{\sum_{i=1}^N\partial{L_i}/\partial{w_{kj}}}{\sum_{i=1}^N\partial^2{L_i}/\partial{w_{kj}^2}}=\frac{\sum_{i=1}^{N}I({x_i}\in{R_{mkj}})[I({y_i}=k)-p_{m-1,k}(x_i)]}{\sum_{i=1}^{N}I^2({x_i}\in{R_{mkj}})p_{m-1,k}(x_i)[1-p_{m-1,k}(x_i)]}=\frac{\sum_{x_i\in{R_{mkj}}}g_{m-1,ki}}{\sum_{x_i\in{R_{mkj}}}\lvert{g_{m-1,ki}}\rvert(1-\lvert{g_{m-1,ki}}\rvert)}$$
 
-文献[1]在$$w_{mkj}$$的前面乘以了$$\frac{K-1}{K}$$的系数，可能原因是在分类器的建立过程中，可以把任意一个$$F_k(x)$$始终设为0，只计算剩余的$$F_k(x)$$，因此$$w_{mkj}=\frac{1}{K}*0+\frac{K-1}{K}w_{mkj}$$
+文献[1]在$$w_{mkj}$$的前面乘以了$$\frac{K-1}{K}$$的系数，可能原因是在分类器的建立过程中，可以把任意一个$$F_k(x)$$始终设为0，只计算剩余的$$F_k(x)$$，因此$$w_{mkj} \gets \frac{1}{K}*0+\frac{K-1}{K}w_{mkj}$$
 
 参考文献
 
