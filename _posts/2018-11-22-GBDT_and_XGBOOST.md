@@ -19,4 +19,10 @@ GBDT算法的流程如下所示：
   + for k=1 to K: compute leaf weights $$w_{mkj}$$ for j=1 to J<sub>mk</sub>
   + for k=1 to K: $$F_{mk}(x)=F_{m-1,k}(x)+\eta*\sum_{j=1}^{J_{mk}}w_{mkj}I({x}\in{R_{mkj}})$$, $$\eta$$为学习率
 
-针对$$w_{mkj}$$的计算，有$$w_{mkj(j=1...J_{mk},k=1...K)}=argmin_{w_{kj(j=1...J_{mk},k=1...K)}}\sum_{i=1}^{N}L(y_i, ...,   F_{m-1,k}(x_i)+\sum_{j=1}^{J_{mk}}w_{kj}I({x}\in{R_{mkj}}), ...)$$   
+针对$$w_{mkj}$$的计算，有$$w_{mkj(j=1...J_{mk},k=1...K)}=argmin_{w_{kj(j=1...J_{mk},k=1...K)}}\sum_{i=1}^{N}L(y_i, ...,   F_{m-1,k}(x_i)+\sum_{j=1}^{J_{mk}}w_{kj}I({x}\in{R_{mkj}}), ...)$$
+
+为了求得w的值，使上述公式的一阶导数为0，问题转化为F(x)=0类型的问题，利用Newton-Raphson公式（在这个问题中将初始值设为0，只进行一步迭代，并且Hessian矩阵只取对角线上的值），记$$L_i=L(y_i, ...,   F_{m-1,k}(x_i)+\sum_{j=1}^{J_{mk}}w_{kj}I({x}\in{R_{mkj}}), ...)$$，有$$w_{mkj}=\sum_{i=1}^N\frac{\partial{L_i}/\partial{w_{kj}}}{\partial^2{L_i}/\partial{w_{kj}^2}}$$
+
+参考文献
+
+[1] Friedman, Jerome H. Greedy function approximation: A gradient boosting machine. Ann. Statist. 29 (2001), 1189--1232.
