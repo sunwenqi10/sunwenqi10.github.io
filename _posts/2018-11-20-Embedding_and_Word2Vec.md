@@ -72,9 +72,9 @@ embed_size = 300 #Size of the embedding vectors(number of units in the embedding
 import tensorflow as tf
 graph = tf.Graph() #Create the graph object
 with graph.as_default():
-    inputs_ = tf.placeholder(tf.int32, [None, None], name='inputs')
-    labels_ = tf.placeholder(tf.int32, [None, None], name='labels')
-    keep_prob = tf.placeholder(tf.float32, name='keep_prob')
+       inputs_ = tf.placeholder(tf.int32, [None, None], name='inputs')
+       labels_ = tf.placeholder(tf.int32, [None, None], name='labels')
+       keep_prob = tf.placeholder(tf.float32, name='keep_prob')
 ### Embed Layer
 n_words = len(vocab_to_int) + 1 #Adding 1 because we use 0's for padding, dictionary started at 1
 with graph.as_default():
