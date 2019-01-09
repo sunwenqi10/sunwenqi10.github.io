@@ -77,8 +77,8 @@ def multi_multi_log_loss(predicted, actual, label_column_indices=LABEL_INDICES, 
            # shrink predictions
            y_hats = np.clip(preds_k, eps, 1 - eps)
            sum_logs = np.sum(actual_k * np.log(y_hats))
-           class_scores[k] = (-1.0 / actual.shape[0]) * sum_logs
-       return np.average(class_scores)        
+           label_scores[k] = (-1.0 / actual.shape[0]) * sum_logs
+       return np.average(label_scores)        
 ```
 
 3. 仅使用数值特征建模
