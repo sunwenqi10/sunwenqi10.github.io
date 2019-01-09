@@ -89,10 +89,15 @@ with graph.as_default():
 ### Output layer
 with graph.as_default():
        outputs, final_state = tf.nn.dynamic_rnn(cell, embed, initial_state=initial_state)
-       predictions = tf.contrib.layers.fully_connected(outputs[:, -1], 1, activation_fn=tf.sigmoid) #从最后一步的输出(batch_size, lstm_size)建立全连接层
+       logits = tf.contrib.layers.fully_connected(outputs[:, -1], 1, activation_fn=None) #从最后一步的输出(batch_size, lstm_size)建立全连接层
+       predictions = tf.nn.sigmoid(logits)
 ### Loss function and Optimizer
+### Two options for loss function:
+###     cost = tf.losses.mean_squared_error(labels_, predictions)
+###     cost = cross-entropy
 with graph.as_default():
-       cost = tf.losses.mean_squared_error(labels_, predictions)  
+       loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.cast(labels_, tf.float32), logits=logits)
+       cost = tf.reduce_mean(loss)  #cross-entropy
        optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost)
 ### Validation and Test Accuracy
 with graph.as_default():
@@ -108,7 +113,8 @@ def get_batches(x, y, batch_size=100):
        for ii in range(0, len(x), batch_size):
            yield x[ii:ii+batch_size], y[ii:ii+batch_size]
 ### Train and Validation
-epochs = 10
+epochs = 20
+best_validation_acc = 0.0 #Best validation accuracy seen so far
 with graph.as_default():
        saver = tf.train.Saver()
 with tf.Session(graph=graph) as sess:
@@ -130,16 +136,20 @@ with tf.Session(graph=graph) as sess:
                        feed = {inputs_: xv, labels_: yv[:, None], keep_prob: 1, initial_state: val_state}
                        batch_acc, val_state = sess.run([accuracy, final_state], feed_dict=feed)
                        val_acc.append(batch_acc)
-                   print("Val acc: {:.3f}".format(np.mean(val_acc)))
+                   validation_acc = np.mean(val_acc)
+                   print("Val acc: {:.3f}".format(validation_acc))
+                   if validation_acc > best_validation_acc:                    
+                       best_validation_acc = validation_acc #Update the best-known validation accuracy             
+                       saver.save(sess, "checkpoints/sentiment_best_validation.ckpt")
                iteration += 1
-       saver.save(sess, "checkpoints/sentiment.ckpt")
+       saver.save(sess, "checkpoints/sentiment_last_iteration.ckpt")
 ```
 
 4. 检验网络
 ```python
 test_acc = []
 with tf.Session(graph=graph) as sess:
-       saver.restore(sess, tf.train.latest_checkpoint('checkpoints'))
+       saver.restore(sess, 'checkpoints/sentiment_best_validation.ckpt') #should also check sentiment_last_iteration.ckpt
        test_state = sess.run(cell.zero_state(batch_size, tf.float32))
        for xt, yt in get_batches(test_x, test_y, batch_size):
            feed = {inputs_: xt, labels_: yt[:, None], keep_prob: 1, initial_state: test_state}
