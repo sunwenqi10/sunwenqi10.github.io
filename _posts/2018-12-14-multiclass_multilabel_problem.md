@@ -99,4 +99,20 @@ clf = OneVsRestClassifier(LogisticRegression())
 clf.fit(X_train, y_train)
 predictions = clf.predict_proba(X_test)
 print("Test Logloss: {}".format(multi_multi_log_loss(predictions, y_test.values)))
+
+### 对文本数据使用bag-of-words
+from sklearn.feature_extraction.text import CountVectorizer
+# converts all text in each row of data_frame to single vector
+def combine_text_columns(data_frame, to_drop=NUMERIC_COLUMNS + LABELS):   
+    to_drop = set(to_drop) & set(data_frame.columns.tolist()) #Drop non-text columns that are in the df
+    text_data = data_frame.drop(to_drop, axis=1)
+    text_data.fillna('', inplace=True)
+    # Join all text items in a row that have a space in between
+    return text_data.apply(lambda x: ' '.join(x), axis=1)
+text_vector = combine_text_columns(df)
+# create the token pattern: TOKENS_ALPHANUMERIC
+TOKENS_ALPHANUMERIC = '[A-Za-z0-9]+(?=\\s+)'  #(?=re)表示当re也匹配成功时输出(前面的部分
+vec_alphanumeric = CountVectorizer(token_pattern=TOKENS_ALPHANUMERIC)
+vec_alphanumeric.fit_transform(text_vector)
+vec_alphanumeric.get_feature_names()
 ```
