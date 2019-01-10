@@ -7,7 +7,7 @@ date: 2018-12-14
 
 本文使用的数据（[下载地址](https://pan.baidu.com/s/1w8MI70oAwK_3knEjdzW1aQ)）是一个多类别多标签分类问题，具体介绍和问题描述参考[此链接](https://www.drivendata.org/competitions/4/box-plots-for-education/page/15)
 
-1. 拆分训练集和测试集
+1. 建立拆分训练集和测试集的函数
 ```python
 import numpy as np
 import pandas as pd
@@ -81,25 +81,87 @@ def multi_multi_log_loss(predicted, actual, label_column_indices=LABEL_INDICES, 
        return np.average(label_scores)        
 ```
 
-3. 仅使用数值特征建模
+3. 读取并拆分数据集
 ```python
-### 读取数据
+### 读取并拆分数据
 df = pd.read_csv('TrainingData.csv', index_col=0)
-NUMERIC_COLUMNS = ['FTE', 'Total']
 LABELS = ['Function', 'Use', 'Sharing', 'Reporting', 'Student_Type', 'Position_Type', \
              'Object_Type', 'Pre_K', 'Operating_Status']
-numeric_data_only = df[NUMERIC_COLUMNS].fillna(-1000)
+NON_LABELS = [c for c in df.columns if c not in LABELS]
+NUMERIC_COLUMNS = ['FTE', 'Total']
 label_dummies = pd.get_dummies(df[LABELS], prefix_sep='__')
-X_train, X_test, y_train, y_test = multilabel_train_test_split(numeric_data_only, label_dummies, \
-                                                                  size=0.2, seed=123)
-### 使用Logistic分类
+X_train, X_test, y_train, y_test = multilabel_train_test_split(df[NON_LABELS], label_dummies, size=0.2, seed=123)
+```
+
+4. 对数据特征进行预处理
+```python
+###(1) 将每行所有文本整合成一个字符串
+def combine_text_columns(data_frame, to_drop=NUMERIC_COLUMNS + LABELS):   
+       to_drop = set(to_drop) & set(data_frame.columns.tolist()) #Drop non-text columns that are in the df
+       text_data = data_frame.drop(to_drop, axis=1)
+       text_data.fillna('', inplace=True)
+       # Join all text items in a row that have a space in between
+       return text_data.apply(lambda x: ' '.join(x), axis=1)
+###(2) 读取文本特征
+from sklearn.preprocessing import FunctionTransformer
+get_text_data = FunctionTransformer(combine_text_columns, validate=False)
+###(3) 读取数值特征
+get_numeric_data = FunctionTransformer(lambda x: x[NUMERIC_COLUMNS], validate=False)
+###(4) 对文本特征按照标点和空格进行分词，并使用 1-gram 和 2-gram
+from sklearn.feature_extraction.text import CountVectorizer
+TOKENS_ALPHANUMERIC = '[A-Za-z0-9]+(?=[!"#$%&\'()*+,-./:;<=>?@[\\\\\]^_`{|}~\\s]+)'  #(?=re)表示当re也匹配成功时输出'('前面的部分
+text_vectorizer = CountVectorizer(token_pattern=TOKENS_ALPHANUMERIC, ngram_range=(1, 2)) #计算每行文本数据中每个一元和二元词组出现的次数
+###(5) 合并数值和文本特征         
+num_text_feature = FeatureUnion([('numeric_features', Pipeline([('selector', get_numeric_data), ('imputer', Imputer())])), \
+                                    ('text_features', Pipeline([('selector', get_text_data), ('vectorizer', text_vectorizer)]))])
+###(6) 特征Interaction
+###    同sklearn中的PolynomialFeatures，但由于CountVectorizer得到的是稀疏矩阵，
+###    不能直接用PolynomialFeatures
+from itertools import combinations
+from scipy import sparse
+from sklearn.base import BaseEstimator, TransformerMixin
+class SparseInteractions(BaseEstimator, TransformerMixin):
+    def __init__(self, degree=2, feature_name_separator="_"):
+        self.degree = degree
+        self.feature_name_separator = feature_name_separator
+    def fit(self, X, y=None):
+        return self
+    def transform(self, X):
+        if not sparse.isspmatrix_csc(X):
+            X = sparse.csc_matrix(X)
+        if hasattr(X, "columns"):
+            self.orig_col_names = X.columns
+        else:
+            self.orig_col_names = np.array([str(i) for i in range(X.shape[1])])
+        spi = self._create_sparse_interactions(X)
+        return spi
+    def get_feature_names(self):
+        return self.feature_names
+    def _create_sparse_interactions(self, X):
+        out_mat = []
+        self.feature_names = self.orig_col_names.tolist()
+        for sub_degree in range(2, self.degree + 1):
+            for col_ixs in combinations(range(X.shape[1]), sub_degree):
+                # add name for new column
+                name = self.feature_name_separator.join(self.orig_col_names[list(col_ixs)])
+                self.feature_names.append(name)
+                # get column multiplications value
+                out = X[:, col_ixs[0]]
+                for j in col_ixs[1:]:
+                    out = out.multiply(X[:, j])
+                out_mat.append(out)
+        return sparse.hstack([X] + out_mat)
+```
+
+4. 使用Logistic分类建立模型
+```python
 from sklearn.linear_model import LogisticRegression
 from sklearn.multiclass import OneVsRestClassifier
-clf = OneVsRestClassifier(LogisticRegression())
-clf.fit(X_train, y_train)
+from sklearn.pipeline import Pipeline
+pl = Pipeline([('union', num_text_feature), ('clf', OneVsRestClassifier(LogisticRegression()))])
+pl.fit(X_train, y_train)
 predictions = clf.predict_proba(X_test)
 print("Test Logloss: {}".format(multi_multi_log_loss(predictions, y_test.values)))
-
 ### 对文本数据使用bag-of-words
 from sklearn.feature_extraction.text import CountVectorizer
 # converts all text in each row of data_frame to single vector
@@ -115,4 +177,5 @@ TOKENS_ALPHANUMERIC = '[A-Za-z0-9]+(?=\\s+)'  #(?=re)表示当re也匹配成功�
 vec_alphanumeric = CountVectorizer(token_pattern=TOKENS_ALPHANUMERIC)
 vec_alphanumeric.fit_transform(text_vector)
 vec_alphanumeric.get_feature_names()
+from sklearn.pipeline import Pipeline
 ```
