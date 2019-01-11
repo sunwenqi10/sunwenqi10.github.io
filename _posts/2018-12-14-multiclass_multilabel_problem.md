@@ -179,7 +179,7 @@ from sklearn.preprocessing import MaxAbsScaler
 pl = Pipeline([('union', num_text_feature), ('inter', SparseInteractions(degree=2)), \
                   ('scale', MaxAbsScaler()), ('clf', OneVsRestClassifier(LogisticRegression()))])
 pl.fit(X_train, y_train)
-predictions = clf.predict_proba(X_test)
+predictions = pl.predict_proba(X_test)
 print("Test Logloss: {}".format(multi_multi_log_loss(predictions, y_test.values)))
 ```
 
