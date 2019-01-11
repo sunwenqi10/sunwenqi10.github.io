@@ -109,13 +109,14 @@ get_text_data = FunctionTransformer(combine_text_columns, validate=False)
 get_numeric_data = FunctionTransformer(lambda x: x[NUMERIC_COLUMNS], validate=False)
 ###(4) 对文本特征按照标点和空格进行分词，并使用 1-gram 和 2-gram
 ###    Option 1: CountVectorizer(token_pattern=TOKENS_ALPHANUMERIC, ngram_range=(1, 2))
-###              计算每行文本数据中每个一元和二元词组出现的次数（缺点：太多特征，太大计算量）
-###    Option 2：HashingVectorizer  （减少特征数目和计算量，同时不牺牲太多精度）
-###              将文本数据中每个一元和二元词组映射为一个哈希值，计算每行数据中每个哈希值出现的次数
+###              记录文本数据中出现的每个一元和二元词组，计算每行文本数据中每个一元和二元词组出现的次数
+###    Option 2: HashingVectorizer(token_pattern=TOKENS_ALPHANUMERIC, ngram_range=(1, 2), alternate_sign=False, norm=None, binary=False, n_features=...)  
+###              若CountVectorizer生成的特征太多，用HashingVectorizer替代可以控制特征数目，减少计算量，同时不牺牲太多精度
+###              将文本数据中每个一元和二元词组映射为一个哈希值，计算每行文本数据中每个哈希值出现的次数
+from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import HashingVectorizer
 TOKENS_ALPHANUMERIC = '[A-Za-z0-9]+(?=[!"#$%&\'()*+,-./:;<=>?@[\\\\\]^_`{|}~\\s]+)'  #(?=re)表示当re也匹配成功时输出'('前面的部分
-text_vectorizer = HashingVectorizer(token_pattern=TOKENS_ALPHANUMERIC, ngram_range=(1, 2), \
-                                       alternate_sign=False, norm=None, binary=False)
+text_vectorizer = CountVectorizer(token_pattern=TOKENS_ALPHANUMERIC, ngram_range=(1, 2))
 ###(5) 合并数值和文本特征         
 num_text_feature = FeatureUnion([('numeric_features', Pipeline([('selector', get_numeric_data), ('imputer', Imputer())])), \
                                     ('text_features', Pipeline([('selector', get_text_data), ('vectorizer', text_vectorizer)]))])
@@ -158,7 +159,7 @@ class SparseInteractions(BaseEstimator, TransformerMixin):
            return sparse.hstack([X] + out_mat)
 ```
 
-4. 使用Logistic分类建立模型
+5. 使用Logistic分类建立模型
 ```python
 from sklearn.linear_model import LogisticRegression
 from sklearn.multiclass import OneVsRestClassifier
@@ -170,7 +171,8 @@ predictions = clf.predict_proba(X_test)
 print("Test Logloss: {}".format(multi_multi_log_loss(predictions, y_test.values)))
 ```
 
-该问题还可从以下几个方面继续探索：
-
-NLP: e.g., stop-word removal; Model: e.g., Random Forest; Numeric Preprocessing: e.g., Imputation strategies;
-Optimization: e.g., Grid Search over pipeline objects
+6. 该问题还可从以下几个方面继续探索
+  + NLP: e.g., stop-word removal
+  + Model: e.g., Random Forest
+  + Numeric Preprocessing: e.g., Imputation strategies
+  + Optimization: e.g., Grid Search over pipeline objects
