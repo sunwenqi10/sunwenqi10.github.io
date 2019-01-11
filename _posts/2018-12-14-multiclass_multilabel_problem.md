@@ -111,16 +111,28 @@ get_numeric_data = FunctionTransformer(lambda x: x[NUMERIC_COLUMNS], validate=Fa
 ###    Option 1: CountVectorizer(token_pattern=TOKENS_ALPHANUMERIC, ngram_range=(1, 2))
 ###              记录文本数据中出现的每个一元和二元词组，计算每行文本数据中每个一元和二元词组出现的次数
 ###    Option 2: HashingVectorizer(token_pattern=TOKENS_ALPHANUMERIC, ngram_range=(1, 2), alternate_sign=False, norm=None, binary=False, n_features=...)  
-###              若CountVectorizer生成的特征太多，用HashingVectorizer替代可以控制特征数目，减少计算量，同时不牺牲太多精度
+###              若CountVectorizer生成的特征太多，用HashingVectorizer替代可以控制特征数目，同时不牺牲太多精度
 ###              将文本数据中每个一元和二元词组映射为一个哈希值，计算每行文本数据中每个哈希值出现的次数
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import HashingVectorizer
 TOKENS_ALPHANUMERIC = '[A-Za-z0-9]+(?=[!"#$%&\'()*+,-./:;<=>?@[\\\\\]^_`{|}~\\s]+)'  #(?=re)表示当re也匹配成功时输出'('前面的部分
 text_vectorizer = CountVectorizer(token_pattern=TOKENS_ALPHANUMERIC, ngram_range=(1, 2))
-###(5) 合并数值和文本特征         
+###(5) 对生成的文本特征进行选择(使用卡方检验)
+###    原理如下所示：
+###    observation O = np.dot(y.T, X), X中的元素>=0, y中的元素为0或1, 2D matrix (num_class, num_feature)
+###    expectation E = np.dot(y.mean(axis=0).T, X.sum(axis=0)), 2D matrix (num_class, num_feature)
+###    卡方统计量 = ((O-E)**2/E).sum(axis=0), 1D array (num_feature,)
+###    每个特征对应的卡方统计量在该特征与分类结果无关的假设条件下服从自由度为num_class-1的卡方分布
+###    每个特征对应的卡方统计量越大, 该特征就越重要
+from sklearn.feature_selection import chi2, SelectKBest
+chi_k = 300
+text_feature_selector = SelectKBest(chi2, chi_k)
+###(6) 合并数值和文本特征
+from sklearn.pipeline import FeatureUnion, Pipeline
+from sklearn.preprocessing import Imputer         
 num_text_feature = FeatureUnion([('numeric_features', Pipeline([('selector', get_numeric_data), ('imputer', Imputer())])), \
-                                    ('text_features', Pipeline([('selector', get_text_data), ('vectorizer', text_vectorizer)]))])
-###(6) 特征Interaction
+                                    ('text_features', Pipeline([('selector', get_text_data), ('vectorizer', text_vectorizer), ('dim_red', text_feature_selector)]))])
+###(7) 特征Interaction
 ###    同sklearn中的PolynomialFeatures，但由于CountVectorizer或HashingVectorizer得到的是稀疏矩阵，
 ###    不能直接用PolynomialFeatures
 from itertools import combinations
@@ -159,13 +171,13 @@ class SparseInteractions(BaseEstimator, TransformerMixin):
            return sparse.hstack([X] + out_mat)
 ```
 
-5. 使用Logistic分类建立模型
+5. 对特征进行尺度变换并使用Logistic分类建立模型
 ```python
 from sklearn.linear_model import LogisticRegression
 from sklearn.multiclass import OneVsRestClassifier
-from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import MaxAbsScaler
 pl = Pipeline([('union', num_text_feature), ('inter', SparseInteractions(degree=2)), \
-                  ('clf', OneVsRestClassifier(LogisticRegression()))])
+                  ('scale', MaxAbsScaler()), ('clf', OneVsRestClassifier(LogisticRegression()))])
 pl.fit(X_train, y_train)
 predictions = clf.predict_proba(X_test)
 print("Test Logloss: {}".format(multi_multi_log_loss(predictions, y_test.values)))
