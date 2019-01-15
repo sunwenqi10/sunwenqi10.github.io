@@ -20,7 +20,7 @@ BN一般用于激活函数使用之前，对每个输出节点，记每个训练
 
 则$$\hat{x}_i=\frac{x_i-{\mu}_B}{\sqrt{\sigma_B^2+\epsilon}}$$，$$\epsilon$$是一个很小的正值（例如0.001），BN的输出为$$y_i= \gamma\hat{x}_i+\beta$$，$$\gamma$$和$$\beta$$均为可训练参数
 
-同时用$${\mu}_B$$和$${\sigma}_B^2$$更新总体的均值和方差，总体均值和方差在检验网络和进行预测时使用，$${\miu}_P=\tau{\miu}_P+(1-\tau){\miu}_B$$和$${\sigma}_P^2=\tau{\sigma}_P^2+(1-\tau){\sigma}_B^2$$，$${\mu}_P$$和$${\sigma}_P^2$$的初始值为0和1，$$\tau$$可取为0.99
+同时用$${\mu}_B$$和$${\sigma}_B^2$$更新总体的均值和方差，总体均值和方差在检验网络和进行预测时使用，$${\mu}_P=\tau{\mu}_P+(1-\tau){\mu}_B$$和$${\sigma}_P^2=\tau{\sigma}_P^2+(1-\tau){\sigma}_B^2$$，$${\mu}_P$$和$${\sigma}_P^2$$的初始值为0和1，$$\tau$$可取为0.99
 
 ### DCGAN应用示例
 
