@@ -34,9 +34,9 @@ import numpy as np
 from scipy.io import loadmat
 import tensorflow as tf
 ### 读取数据
-data_dir = 'data/svhn'
-trainset = loadmat(data_dir + 'train_32x32.mat')
-testset = loadmat(data_dir + 'test_32x32.mat')
+data_dir = 'data/'
+trainset = loadmat(data_dir + 'svhntrain_32x32.mat')
+testset = loadmat(data_dir + 'svhntest_32x32.mat')
 #the same scale as tanh activation function
 def scale(x, feature_range=(-1, 1)):
        # scale to (0, 1)
@@ -222,3 +222,5 @@ def view_samples(sample, nrows, ncols, figsize=(5,5)): #the number of the sample
        return fig, axes
 view_samples(samples[-1], 6, 12, figsize=(10,5))
 ```
+
+![img](/img/svhn.png)
