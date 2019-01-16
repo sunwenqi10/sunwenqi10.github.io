@@ -157,7 +157,7 @@ class GAN:
            tf.reset_default_graph()      
            self.input_real, self.input_z = model_inputs(real_size, z_size)
            self.training = tf.placeholder_with_default(True, (), "train_status")        
-           self.d_loss, self.g_loss, self.g_model = model_loss(self.input_real, self.input_z, real_size[2], \
+           self.d_loss, self.g_loss, self.samples = model_loss(self.input_real, self.input_z, real_size[2], \
                                                                training=self.training, alpha=alpha, smooth=smooth)      
            self.d_opt, self.g_opt = model_opt(self.d_loss, self.g_loss, learning_rate, beta1)
 ```
@@ -189,7 +189,7 @@ def train(net, dataset, epochs, batch_size, print_every=10, show_every=100):
                    ### save generated samples
                    if steps % show_every == 0:
                        # training=False: the batch normalization layers will use the population statistics rather than the batch statistics
-                       gen_samples = sess.run(net.g_model, feed_dict={net.input_z: sample_z, net.training: False})
+                       gen_samples = sess.run(net.samples, feed_dict={net.input_z: sample_z, net.training: False})
                        samples.append(gen_samples)                       
            saver.save(sess, './checkpoints/generator.ckpt')
        with open('samples.pkl', 'wb') as f:
