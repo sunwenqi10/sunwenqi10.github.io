@@ -117,64 +117,64 @@ def generator(z, output_dim, reuse=False, alpha=0.2, training=True, size_mult=12
 ### Add dropout layer to reduce overfitting since only 1000 labelled samples exist
 ### extra_class = 0: 10 class classification(10 digits) and set fake logit=0
 ### extra_class = 1: 11 class classification(10 digits+fake image)
-### The two settings basically the same, but extra_class=0 has higher test accuracy
+### The two settings basically the same, but since the final purpose is classifying a real image to 10 digits, extra_class=0 may be more proper
 ###################
 def discriminator(x, reuse=False, training=True, alpha=0.2, drop_rate=0., num_classes=10, size_mult=64, extra_class=0):
-    with tf.variable_scope('discriminator', reuse=reuse):
-        # Add dropout layer
-        x = tf.layers.dropout(x, rate=drop_rate/2.5) #Input layer (:,32,32,3)   
-        ###################
-        x1 = tf.layers.conv2d(x, size_mult, 3, strides=2, padding='same')
-        relu1 = tf.maximum(alpha * x1, x1)
-        # Add dropout layer
-        relu1 = tf.layers.dropout(relu1, rate=drop_rate) #(:,16,16,size_mult)
-        ###################
-        x2 = tf.layers.conv2d(relu1, size_mult, 3, strides=2, padding='same')
-        bn2 = tf.layers.batch_normalization(x2, training=training)
-        relu2 = tf.maximum(alpha * x2, x2) #(:,8,8,size_mult)
-        relu2 = tf.layers.dropout(relu2, rate=drop_rate)
-        ###################
-        x3 = tf.layers.conv2d(relu2, size_mult, 3, strides=2, padding='same')
-        bn3 = tf.layers.batch_normalization(x3, training=training)
-        relu3 = tf.maximum(alpha * bn3, bn3)
-        # Add dropout layer
-        relu3 = tf.layers.dropout(relu3, rate=drop_rate) #(:,4,4,size_mult)
-        ###################
-        x4 = tf.layers.conv2d(relu3, 2 * size_mult, 3, strides=1, padding='same')
-        bn4 = tf.layers.batch_normalization(x4, training=training)
-        relu4 = tf.maximum(alpha * bn4, bn4) #(:,4,4,2*size_mult)
-        relu4 = tf.layers.dropout(relu4, rate=drop_rate)
-        ###################
-        x5 = tf.layers.conv2d(relu4, 2 * size_mult, 3, strides=1, padding='same')
-        bn5 = tf.layers.batch_normalization(x5, training=training)
-        relu5 = tf.maximum(alpha * bn5, bn5) #(:,4,4,2*size_mult)
-        relu5 = tf.layers.dropout(relu5, rate=drop_rate)
-        ###################
-        x6 = tf.layers.conv2d(relu5, 2 * size_mult, 3, strides=1, padding='valid')
-        # This layer is used for the feature matching loss, don't use batch normalization on this layer
-        # See the function model_loss for the feature matching loss
-        relu6 = tf.maximum(alpha * x6, x6) #(:,2,2,2*size_mult)
-        ###################
-        # Flatten by global average pooling
-        features = tf.reduce_mean(relu6, (1, 2)) #(:,2*size_mult)
-        # Multi-classification
-        class_logits = tf.layers.dense(features, num_classes + extra_class) #(:,10) or (:,11)
-        out = tf.nn.softmax(class_logits)
-        ###################
-        # Split real and fake logits for classifying real and fake
-        if extra_class==1:
-            real_class_logits, fake_class_logits = tf.split(class_logits, [num_classes, 1], 1) #real(:,10); fake(:,1)
-            fake_class_logits = tf.squeeze(fake_class_logits) #(number of samples,)
-        else:
-            real_class_logits = class_logits
-            fake_class_logits = 0
-        # Set gan_logits such that P(input is real | input) = sigmoid(gan_logits)
-        # For Numerical stability, use this trick: log sum_i exp a_i = m + log sum_i exp(a_i - m), m = max_i a_i
-        mx = tf.reduce_max(real_class_logits, 1, keepdims=True) #(:,1)
-        stable_real_class_logits = real_class_logits - mx #minus the largest real logit for each sample, (:,10)
-        gan_logits = tf.log(tf.reduce_sum(tf.exp(stable_real_class_logits), 1)) + tf.squeeze(mx) - fake_class_logits #(number of samples,)
-        ###################
-        return out, class_logits, gan_logits, features
+       with tf.variable_scope('discriminator', reuse=reuse):
+           # Add dropout layer
+           x = tf.layers.dropout(x, rate=drop_rate/2.5) #Input layer (:,32,32,3)   
+           ###################
+           x1 = tf.layers.conv2d(x, size_mult, 3, strides=2, padding='same')
+           relu1 = tf.maximum(alpha * x1, x1)
+           # Add dropout layer
+           relu1 = tf.layers.dropout(relu1, rate=drop_rate) #(:,16,16,size_mult)
+           ###################
+           x2 = tf.layers.conv2d(relu1, size_mult, 3, strides=2, padding='same')
+           bn2 = tf.layers.batch_normalization(x2, training=training)
+           relu2 = tf.maximum(alpha * x2, x2) #(:,8,8,size_mult)
+           relu2 = tf.layers.dropout(relu2, rate=drop_rate)
+           ###################
+           x3 = tf.layers.conv2d(relu2, size_mult, 3, strides=2, padding='same')
+           bn3 = tf.layers.batch_normalization(x3, training=training)
+           relu3 = tf.maximum(alpha * bn3, bn3)
+           # Add dropout layer
+           relu3 = tf.layers.dropout(relu3, rate=drop_rate) #(:,4,4,size_mult)
+           ###################
+           x4 = tf.layers.conv2d(relu3, 2 * size_mult, 3, strides=1, padding='same')
+           bn4 = tf.layers.batch_normalization(x4, training=training)
+           relu4 = tf.maximum(alpha * bn4, bn4) #(:,4,4,2*size_mult)
+           relu4 = tf.layers.dropout(relu4, rate=drop_rate)
+           ###################
+           x5 = tf.layers.conv2d(relu4, 2 * size_mult, 3, strides=1, padding='same')
+           bn5 = tf.layers.batch_normalization(x5, training=training)
+           relu5 = tf.maximum(alpha * bn5, bn5) #(:,4,4,2*size_mult)
+           relu5 = tf.layers.dropout(relu5, rate=drop_rate)
+           ###################
+           x6 = tf.layers.conv2d(relu5, 2 * size_mult, 3, strides=1, padding='valid')
+           # This layer is used for the feature matching loss, don't use batch normalization on this layer
+           # See the function model_loss for the feature matching loss
+           relu6 = tf.maximum(alpha * x6, x6) #(:,2,2,2*size_mult)
+           ###################
+           # Flatten by global average pooling
+           features = tf.reduce_mean(relu6, (1, 2)) #(:,2*size_mult)
+           # Multi-classification
+           class_logits = tf.layers.dense(features, num_classes + extra_class) #(:,10) or (:,11)
+           out = tf.nn.softmax(class_logits)
+           ###################
+           # Split real and fake logits for classifying real and fake
+           if extra_class==1:
+               real_class_logits, fake_class_logits = tf.split(class_logits, [num_classes, 1], 1) #real(:,10); fake(:,1)
+               fake_class_logits = tf.squeeze(fake_class_logits) #(number of samples,)
+           else:
+               real_class_logits = class_logits
+               fake_class_logits = 0
+           # Set gan_logits such that P(input is real | input) = sigmoid(gan_logits)
+           # For Numerical stability, use this trick: log sum_i exp a_i = m + log sum_i exp(a_i - m), m = max_i a_i
+           mx = tf.reduce_max(real_class_logits, 1, keepdims=True) #(:,1)
+           stable_real_class_logits = real_class_logits - mx #minus the largest real logit for each sample, (:,10)
+           gan_logits = tf.log(tf.reduce_sum(tf.exp(stable_real_class_logits), 1)) + tf.squeeze(mx) - fake_class_logits #(number of samples,)
+           ###################
+           return out, class_logits, gan_logits, features
 ### Create GAN and Compute Model Loss
 def model_loss(input_real, input_z, output_dim, y, num_classes, label_mask, g_size_mult, d_size_mult, \
                training=True, alpha=0.2, drop_rate=0.):
@@ -195,7 +195,7 @@ def model_loss(input_real, input_z, output_dim, y, num_classes, label_mask, g_si
        d_loss_fake = tf.reduce_mean(d_loss_fake)
        y = tf.squeeze(y) #labels
        class_cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(logits=class_logits_real, \
-                                                                        labels=tf.one_hot(y, num_classes+1, dtype=tf.float32))
+                                                                        labels=tf.one_hot(y, class_logits_real.get_shape()[1], dtype=tf.float32))
        # Use label_mask to ignore the examples pretending unlabeled for the semi-supervised problem                                                                            
        class_cross_entropy = tf.squeeze(class_cross_entropy)
        label_mask = tf.squeeze(tf.to_float(label_mask))
