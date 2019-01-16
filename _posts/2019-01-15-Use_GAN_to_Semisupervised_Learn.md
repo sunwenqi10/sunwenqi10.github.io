@@ -160,7 +160,7 @@ def discriminator(x, reuse=False, training=True, alpha=0.2, drop_rate=0., num_cl
            fake_class_logits = tf.squeeze(fake_class_logits) #(number of samples,)
            # Set gan_logits such that P(input is real | input) = sigmoid(gan_logits)
            # For Numerical stability, use this trick: log sum_i exp a_i = m + log sum_i exp(a_i - m), m = max_i a_i
-           mx = tf.reduce_max(real_class_logits, 1, keep_dims=True) #(:,1)
+           mx = tf.reduce_max(real_class_logits, 1, keepdims=True) #(:,1)
            stable_real_class_logits = real_class_logits - mx #minus the largest real logit for each sample, (:,10)
            gan_logits = tf.log(tf.reduce_sum(tf.exp(stable_real_class_logits), 1)) + tf.squeeze(mx) - fake_class_logits #(number of samples,)
            ###################
@@ -300,15 +300,4 @@ plt.plot(train_accuracies, label='Train', alpha=0.5)
 plt.plot(test_accuracies, label='Test', alpha=0.5)
 plt.title("Accuracy")
 plt.legend()
-###################
-def view_samples(sample, nrows, ncols, figsize=(5,5)):
-       fig, axes = plt.subplots(figsize=figsize, nrows=nrows, ncols=ncols, sharey=True, sharex=True)
-       for ax, img in zip(axes.flatten(), sample):
-           ax.axis('off')
-           img = ((img - img.min())*255 / (img.max() - img.min())).astype(np.uint8)
-           ax.set_adjustable('box-forced')
-           im = ax.imshow(img, aspect='equal')   
-       plt.subplots_adjust(wspace=0, hspace=0)
-       return fig, axes
-view_samples(samples[-1], 5, 10, figsize=(10,5))
 ```
