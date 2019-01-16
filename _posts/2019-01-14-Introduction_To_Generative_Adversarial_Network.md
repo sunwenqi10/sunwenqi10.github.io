@@ -103,17 +103,17 @@ def generator(z, output_dim, reuse=False, alpha=0.2, training=True):
            out = tf.tanh(logits)        
            return out
 ### Discriminator
-def discriminator(x, reuse=False, alpha=0.2):
+def discriminator(x, reuse=False, training=True, alpha=0.2):
        with tf.variable_scope('discriminator', reuse=reuse):  
            x1 = tf.layers.conv2d(x, 64, 5, strides=2, padding='same') #Input layer is 32x32x3
            relu1 = tf.maximum(alpha * x1, x1) #16x16x64
            # convolution > batch norm > leaky ReLU
            x2 = tf.layers.conv2d(relu1, 128, 5, strides=2, padding='same')
-           bn2 = tf.layers.batch_normalization(x2, training=True)
+           bn2 = tf.layers.batch_normalization(x2, training=training)
            relu2 = tf.maximum(alpha * bn2, bn2) #8x8x128
            # convolution > batch norm > leaky ReLU
            x3 = tf.layers.conv2d(relu2, 256, 5, strides=2, padding='same')
-           bn3 = tf.layers.batch_normalization(x3, training=True)
+           bn3 = tf.layers.batch_normalization(x3, training=training)
            relu3 = tf.maximum(alpha * bn3, bn3) #4x4x256
            # Flatten it
            flat = tf.reshape(relu3, (-1, 4*4*256))
@@ -124,11 +124,11 @@ def discriminator(x, reuse=False, alpha=0.2):
 ### input_real: Images from the real dataset
 ### input_z: Z input(noise)
 ### out_channel_dim: The number of channels in the output image
-def model_loss(input_real, input_z, output_dim, alpha=0.2, smooth=0.1):
-       g_model = generator(input_z, output_dim, alpha=alpha)
-       d_model_real, d_logits_real = discriminator(input_real, alpha=alpha)
+def model_loss(input_real, input_z, output_dim, training=True, alpha=0.2, smooth=0.1):
+       g_model = generator(input_z, output_dim, alpha=alpha, training=training)
+       d_model_real, d_logits_real = discriminator(input_real, training=training, alpha=alpha)
        # reuse=True: reuse the variables instead of creating new ones if we build the graph again
-       d_model_fake, d_logits_fake = discriminator(g_model, reuse=True, alpha=alpha)
+       d_model_fake, d_logits_fake = discriminator(g_model, reuse=True, training=training, alpha=alpha)
        # real and fake loss
        d_loss_real = tf.nn.sigmoid_cross_entropy_with_logits(logits=d_logits_real, labels=tf.ones_like(d_model_real)*(1-smooth)) #label smoothing
        d_loss_real = tf.reduce_mean(d_loss_real)
@@ -138,7 +138,7 @@ def model_loss(input_real, input_z, output_dim, alpha=0.2, smooth=0.1):
        d_loss = d_loss_real + d_loss_fake
        g_loss = tf.nn.sigmoid_cross_entropy_with_logits(logits=d_logits_fake, labels=tf.ones_like(d_model_fake))
        g_loss = tf.reduce_mean(g_loss)
-       return d_loss, g_loss
+       return d_loss, g_loss, g_model
 ### Optimizer
 ### beta1: The exponential decay rate for the 1st moment in the optimizer
 def model_opt(d_loss, g_loss, learning_rate, beta1):
@@ -155,8 +155,10 @@ def model_opt(d_loss, g_loss, learning_rate, beta1):
 class GAN:
        def __init__(self, real_size, z_size, learning_rate, alpha=0.2, smooth=0.1, beta1=0.5):
            tf.reset_default_graph()      
-           self.input_real, self.input_z = model_inputs(real_size, z_size)        
-           self.d_loss, self.g_loss = model_loss(self.input_real, self.input_z, real_size[2], alpha=alpha, smooth=smooth)      
+           self.input_real, self.input_z = model_inputs(real_size, z_size)
+           self.training = tf.placeholder_with_default(True, (), "train_status")        
+           self.d_loss, self.g_loss, self.g_model = model_loss(self.input_real, self.input_z, real_size[2], \
+                                                               training=self.training, alpha=alpha, smooth=smooth)      
            self.d_opt, self.g_opt = model_opt(self.d_loss, self.g_loss, learning_rate, beta1)
 ```
 
@@ -187,8 +189,7 @@ def train(net, dataset, epochs, batch_size, print_every=10, show_every=100):
                    ### save generated samples
                    if steps % show_every == 0:
                        # training=False: the batch normalization layers will use the population statistics rather than the batch statistics
-                       gen_samples = sess.run(generator(net.input_z, 3, reuse=True, training=False), \
-                                              feed_dict={net.input_z: sample_z})
+                       gen_samples = sess.run(net.g_model, feed_dict={net.input_z: sample_z, net.training: False})
                        samples.append(gen_samples)                       
            saver.save(sess, './checkpoints/generator.ckpt')
        with open('samples.pkl', 'wb') as f:
