@@ -16,7 +16,7 @@ date: 2019-01-14
 
 Batch Normalization是DCGAN(Deep Covolutional GAN)中常用的技术，它可以使网络训练得更快，允许更大的学习率，使更多的激活函数变得有效，并且使得参数更易初始化
 
-BN一般用于激活函数使用之前，对每个输出节点，记第i个训练样本在该节点的输出为$$x_i$$，批次均值$${\mu}_B=\frac{1}{m}\sum_{i=1}^{m}x_i$$，批次方差$${\sigma}_B^2=\frac{1}{m}\sum_{i=1}^{m}(x_i-{\mu}_B)^2$$
+BN一般用于激活函数使用之前，对每个输出节点，记第$$i$$个训练样本在该节点的输出为$$x_i$$，批次均值$${\mu}_B=\frac{1}{m}\sum_{i=1}^{m}x_i$$，批次方差$${\sigma}_B^2=\frac{1}{m}\sum_{i=1}^{m}(x_i-{\mu}_B)^2$$
 
 则$$\hat{x}_i=\frac{x_i-{\mu}_B}{\sqrt{\sigma_B^2+\epsilon}}$$，$$\epsilon$$是一个很小的正值（例如0.001），BN的输出为$$y_i= \gamma\hat{x}_i+\beta$$，$$\gamma$$和$$\beta$$均为可训练参数
 
