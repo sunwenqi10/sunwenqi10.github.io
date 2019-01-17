@@ -115,8 +115,8 @@ def generator(z, output_dim, reuse=False, alpha=0.2, training=True, size_mult=12
 ### Discriminator
 ###################
 ### Add dropout layer to reduce overfitting since only 1000 labelled samples exist
-### extra_class = 0: 10 class classification(10 digits) and set fake logit=0
-### extra_class = 1: 11 class classification(10 digits+fake image)
+### extra_class = 0: 10 class classification(10 digits) and set [fake logit=0]
+### extra_class = 1: 11 class classification(10 digits+[fake image])
 ### The two settings basically the same, but since the final purpose is classifying a real image to 10 digits, extra_class=0 may be more proper
 ###################
 def discriminator(x, reuse=False, training=True, alpha=0.2, drop_rate=0., num_classes=10, size_mult=64, extra_class=0):
@@ -164,7 +164,7 @@ def discriminator(x, reuse=False, training=True, alpha=0.2, drop_rate=0., num_cl
                fake_class_logits = tf.squeeze(fake_class_logits) #(number of samples,)
            else:
                real_class_logits = class_logits
-               fake_class_logits = 0
+               fake_class_logits = 0.
            # Set gan_logits such that P(input is real | input) = sigmoid(gan_logits)
            # For Numerical stability, use this trick: log sum_i exp a_i = m + log sum_i exp(a_i - m), m = max_i a_i
            mx = tf.reduce_max(real_class_logits, 1, keepdims=True) #(:,1)
