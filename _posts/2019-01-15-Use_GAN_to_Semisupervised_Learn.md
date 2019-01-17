@@ -132,7 +132,6 @@ def discriminator(x, reuse=False, training=True, alpha=0.2, drop_rate=0., num_cl
            x2 = tf.layers.conv2d(relu1, size_mult, 3, strides=2, padding='same')
            bn2 = tf.layers.batch_normalization(x2, training=training)
            relu2 = tf.maximum(alpha * x2, x2) #(:,8,8,size_mult)
-           relu2 = tf.layers.dropout(relu2, rate=drop_rate)
            ###################
            x3 = tf.layers.conv2d(relu2, size_mult, 3, strides=2, padding='same')
            bn3 = tf.layers.batch_normalization(x3, training=training)
@@ -143,12 +142,10 @@ def discriminator(x, reuse=False, training=True, alpha=0.2, drop_rate=0., num_cl
            x4 = tf.layers.conv2d(relu3, 2 * size_mult, 3, strides=1, padding='same')
            bn4 = tf.layers.batch_normalization(x4, training=training)
            relu4 = tf.maximum(alpha * bn4, bn4) #(:,4,4,2*size_mult)
-           relu4 = tf.layers.dropout(relu4, rate=drop_rate)
            ###################
            x5 = tf.layers.conv2d(relu4, 2 * size_mult, 3, strides=1, padding='same')
            bn5 = tf.layers.batch_normalization(x5, training=training)
            relu5 = tf.maximum(alpha * bn5, bn5) #(:,4,4,2*size_mult)
-           relu5 = tf.layers.dropout(relu5, rate=drop_rate)
            ###################
            x6 = tf.layers.conv2d(relu5, 2 * size_mult, 3, strides=1, padding='valid')
            # This layer is used for the feature matching loss, don't use batch normalization on this layer
@@ -305,9 +302,12 @@ net = GAN(real_size, z_size, learning_rate)
 train_accuracies, test_accuracies, samples = train(net, dataset, epochs, batch_size)
 ###################
 # Plot accuracies
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(10,5))
 plt.plot(train_accuracies, label='Train', alpha=0.5)
 plt.plot(test_accuracies, label='Test', alpha=0.5)
-plt.title("Accuracy")
+ax.set_xticks(range(epochs))
+plt.title("Accuracy(Final Test: {0}%)".format(int(round(test_accuracies[-1]*100))))
 plt.legend()
 ```
+
+![img](/img/svhn_semi.png)
