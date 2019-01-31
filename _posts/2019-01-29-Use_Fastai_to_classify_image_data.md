@@ -33,7 +33,7 @@ data.show_batch(rows=3, figsize=(7,6)) #grab a batch and display 3x3 images
 
 使用Resnet34进行迁移学习，首先通过lr_find确定最大学习率，再通过fit_one_cycle([1-Cycle style](https://arxiv.org/pdf/1803.09820.pdf))进行训练
 
-lr_find: 在前面几次的迭代中将学习率从一个很小的值逐渐增加，选择损失函数(train loss)处于明显下降趋势之中并且距离损失停止下降的拐点有一定距离的点做为模型的最大学习率max_lr
+lr_find: 在前面几次的迭代中将学习率从一个很小的值逐渐增加，选择损失函数(train loss)处于下降趋势之中并且距离损失停止下降的拐点有一定距离的点做为模型的最大学习率max_lr
 
 fit_one_cycle: 共分为两个阶段，在第一阶段学习率从max_lr/div_factor线性增长到max_lr，momentum线性地从moms[0]降到moms[1]；第二阶段学习率以余弦形式从max_lr降为0，momentum也同样按余弦形式从moms[1]增长到moms[0]。第一阶段的迭代次数占总迭代次数的比例为pct_start
 
@@ -45,7 +45,7 @@ learn = create_cnn(data, models.resnet34, metrics=error_rate)
 print(learn.model) #model summary
 learn.lr_find()
 learn.recorder.plot() #由左上图可以看出max_lr可选择函数fit_one_cycle的默认值0.003
-learn.fit_one_cycle(4, max_lr=0.003, div_factor=25.0, moms=(0.95, 0.85), pct_start=0.3) #4 epochs
+learn.fit_one_cycle(4, max_lr=slice(0.003), div_factor=25.0, moms=(0.95, 0.85), pct_start=0.3) #4 epochs
 learn.recorder.plot_lr(show_moms=True) #中上图(学习率)和右上图(momentum), x轴表示迭代次数
 learn.save('stage-1') #save model
 ### Unfreeze all the model layers and keep training
