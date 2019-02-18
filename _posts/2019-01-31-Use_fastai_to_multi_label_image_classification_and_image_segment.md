@@ -1,11 +1,11 @@
 ---
 layout: post
-title: "使用fastai进行图像多标签学习"
+title: "使用fastai进行图像多标签学习和图像分割"
 tags: [深度学习]
 date: 2019-01-31
 ---
 
-多标签分类(multi-label classification)项目([Data](https://www.kaggle.com/c/planet-understanding-the-amazon-from-space/data))
+### 多标签分类(multi-label classification)项目([Data](https://www.kaggle.com/c/planet-understanding-the-amazon-from-space/data))
 + 从卫星图片了解亚马逊雨林，每张图片可属于多个标签
 
 #### F score
@@ -41,7 +41,7 @@ date: 2019-01-31
 <br>
 
 
-项目代码
+#### 项目代码
 ```python
 from fastai.vision import *
 path=Path('data/planet')
@@ -100,3 +100,78 @@ learn.save('stage-2-256-rn50')
 learn.export() #导出模型
 ```
 ![img](/img/planet.png)
+
+
+### 图像分割(image segmentation)项目
++ 使用的数据集为[该Github项目](https://github.com/alexgkendall/SegNet-Tutorial.git)中简化的CamVid数据集
+
+#### 项目代码
+```python
+from fastai import *
+from fastai.vision import *
+from fastai.callbacks.hooks import *
+path = Path('./CamVid')
+src_size = np.array([360, 480]) #original image size
+### get mask image file name from original image file name
+###     e.g., ./CamVid/val/0016E5_08085.png--> ./CamVid/valannot/0016E5_08085.png
+def get_y_fn(x): return Path(str(x.parent)+'annot')/x.name
+codes = array(['Sky', 'Building', 'Pole', 'Road', 'Sidewalk', 'Tree', \
+               'Sign', 'Fence', 'Car', 'Pedestrian', 'Cyclist', 'Void']) #mask code
+bs, size = 8, src_size//2
+### Use data block API for data preparation
+###     1. 从path及其子文件夹下搜索图片文件
+###     2. train/validation split(path/train, path/val)         
+###     3. 从原始图片得到mask图片作为标签
+###     4. data augmentation and resize(tfm_y: 标签是否同样进行转换)   
+###     5. 生成DataBunch并对数据进行标准化
+src = SegmentationItemList.from_folder(path).split_by_folder(valid='val') \
+                          .label_from_func(get_y_fn, classes=codes)
+data = src.transform(get_transforms(), size=size, tfm_y=True) \
+          .databunch(bs=bs).normalize(imagenet_stats)
+data.show_batch(2, figsize=(10,7)) #display
+### Accuracy function
+###     去掉标记为‘Void’的像素点之后再计算准确率
+###     input: (bs, len(codes), 180, 240); target: (bs, 1, 180, 240)
+name2id = {v:k for k,v in enumerate(codes)}
+void_code = name2id['Void']
+def acc_camvid(input, target):
+    target = target.squeeze(1) #(bs, 1, 180, 240)-->(bs, 180, 240)
+    mask = target != void_code
+    return (input.argmax(dim=1)[mask]==target[mask]).float().mean()
+metrics=acc_camvid
+### Unet Model
+wd=1e-2 #weight decay
+learn = unet_learner(data, models.resnet34, metrics=metrics, wd=wd, bottle=True)
+lr_find(learn)
+learn.recorder.plot() #左上图
+lr=2e-3 #from lr_find
+learn.fit_one_cycle(10, slice(lr), pct_start=0.8)
+learn.save('stage-1')
+learn.unfreeze() #fine-tune the whole model
+lr_find(learn)
+learn.recorder.plot() #右上图
+lrs = slice(lr/100,lr) #from lr_find
+learn.fit_one_cycle(12, lrs, pct_start=0.8)
+learn.save('stage-2')
+### Use bigger images to train
+learn=None
+gc.collect() #clear memory
+bs, size = 4, src_size
+data = src.transform(get_transforms(), size=size, tfm_y=True) \
+          .databunch(bs=bs).normalize(imagenet_stats)
+learn = unet_learner(data, models.resnet34, metrics=metrics, wd=wd, bottle=True).load('stage-2')
+lr_find(learn)
+learn.recorder.plot() #左中图
+lr=3e-4
+learn.fit_one_cycle(10, slice(lr), pct_start=0.8)
+learn.save('stage-1-big')
+learn.unfreeze()
+lr_find(learn)
+learn.recorder.plot() #右中图
+lrs = slice(1e-6,lr/3)
+learn.fit_one_cycle(10, lrs)
+learn.save('stage-2-big')
+learn.show_results(rows=1, figsize=(9,4)) #左下图为真实值, 右下图为预测值
+```
+
+![img](/img/seg.png)
