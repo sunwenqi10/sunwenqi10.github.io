@@ -174,4 +174,4 @@ learn.save('stage-2-big')
 learn.show_results(rows=1, figsize=(9,4)) #左下图为真实值, 右下图为预测值
 ```
 
-![img](/img/seg.png)
+![img](/img/seg.PNG)
