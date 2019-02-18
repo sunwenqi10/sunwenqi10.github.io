@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "使用fastai进行图像多标签学习和图像分割"
+title: "使用fastai进行图像多标签分类和图像分割"
 tags: [深度学习]
 date: 2019-01-31
 ---
