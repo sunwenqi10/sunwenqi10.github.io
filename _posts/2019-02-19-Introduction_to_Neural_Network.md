@@ -33,5 +33,8 @@ date: 2019-02-19
 
 ### 3. Backward Propagation
 
-记$$dA^{[l]}=\frac{\partial \mathcal{J} }{\partial A^{[l]}}$$，则
-分别有$$dZ^{[l]}=\frac{\partial \mathcal{J} }{\partial Z^{[l]}}=dA^{[l]}* g'(Z^{[l]})$$，$$dW^{[l]} = \frac{\partial \mathcal{J} }{\partial W^{[l]}} = \frac{1}{m} dZ^{[l]} A^{[l-1] T}$$，$$db^{[l]} = \frac{\partial \mathcal{J} }{\partial b^{[l]}} = \frac{1}{m} \sum_{i = 1}^{m} dZ^{[l](i)}$$，$$dA^{[l-1]} = \frac{\partial \mathcal{J} }{\partial A^{[l-1]}} = W^{[l] T} dZ^{[l]}$$
+记$$dA^{[l]}=\frac{\partial \mathcal{J} }{\partial A^{[l]}}$$，则可推出以下公式：
++ $$dZ^{[l]}=\frac{\partial \mathcal{J} }{\partial Z^{[l]}}=dA^{[l]}* g'(Z^{[l]})$$
++ $$dW^{[l]} = \frac{\partial \mathcal{J} }{\partial W^{[l]}} = \frac{1}{m} dZ^{[l]} A^{[l-1] T}$$
++ $$db^{[l]} = \frac{\partial \mathcal{J} }{\partial b^{[l]}} = \frac{1}{m} \sum_{i = 1}^{m} dZ^{[l](i)}$$
++ $$dA^{[l-1]} = \frac{\partial \mathcal{J} }{\partial A^{[l-1]}} = W^{[l] T} dZ^{[l]}$$
