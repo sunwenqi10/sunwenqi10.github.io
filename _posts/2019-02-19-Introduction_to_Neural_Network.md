@@ -27,6 +27,11 @@ date: 2019-02-19
 
 ### 2. Loss Function
 
-若为二分类问题，损失函数可写为$$J=-\frac{1}{m} \sum\limits_{i = 1}^{m} [y^{(i)}\log\left(a^{[L] (i)}\right) + (1-y^{(i)})\log\left(1- a^{[L](i)}\right)]$$
+若为回归问题，损失函数可写为$$\mathcal{J}=\frac{1}{2m}\sum\limits_{i = 1}^{m}(a^{[L] (i)}-y^{(i)})^2$$，其中$$a^{[L] (i)}$$为第$$i$$个样本的预测值（即$$A^{[L]}$$的$$i$$列），$$y^{(i)}$$为第$$i$$个样本的真实值
 
-若为回归问题，损失函数可写为$$J=\frac{1}{2m}(a^{[L] (i)}-y^{(i)})^2$$
+若为二分类问题，损失函数可写为$$\mathcal{J}=-\frac{1}{m} \sum\limits_{i = 1}^{m} [y^{(i)}\log\left(a^{[L] (i)}\right) + (1-y^{(i)})\log\left(1- a^{[L](i)}\right)]$$
+
+### 3. Backward Propagation
+
+记$$dA^{[l]}=\frac{\partial \mathcal{J} }{\partial A^{[l]}}$$，则
+分别有$$dZ^{[l]}=\frac{\partial \mathcal{J} }{\partial Z^{[l]}}=dA^{[l]}* g'(Z^{[l]})$$，$$dW^{[l]} = \frac{\partial \mathcal{J} }{\partial W^{[l]}} = \frac{1}{m} dZ^{[l]} A^{[l-1] T}$$，$$db^{[l]} = \frac{\partial \mathcal{J} }{\partial b^{[l]}} = \frac{1}{m} \sum_{i = 1}^{m} dZ^{[l](i)}$$，$$dA^{[l-1]} = \frac{\partial \mathcal{J} }{\partial A^{[l-1]}} = W^{[l] T} dZ^{[l]}$$
