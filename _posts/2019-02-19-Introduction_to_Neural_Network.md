@@ -17,7 +17,7 @@ date: 2019-02-19
 
 第$$l$$层（$$l=1,2,...,L$$）使用激活函数前的值$$Z^{[l]}$$为$$n_l$$行$$m$$列的矩阵，使用激活函数后的值$$A^{[l]}$$为$$n_l$$行$$m$$列的矩阵
 
-### 公式
+### 一、公式
 
 #### 1. Forward Propagation
 
@@ -45,7 +45,7 @@ date: 2019-02-19
 
 $$W^{[l]} = W^{[l]} - \alpha \text{ } dW^{[l]}$$，$$b^{[l]} = b^{[l]} - \alpha \text{ } db^{[l]}$$，$$\alpha$$为学习率
 
-### 代码
+### 二、代码
 
 #### Initialize Parameters
 ```python
@@ -300,7 +300,7 @@ def train(X, Y, type, parameters, learning_rate):
     return parameters
 ```
 
-### 应用
+### 三、应用
 
 使用的[数据](https://pan.baidu.com/s/16q_nmE9ID45bU06nsMCKLQ)为共享单车骑行数据，通过建立神经网络来预测共享单车的使用量
 ```python
@@ -340,7 +340,7 @@ for i in range(iterations):
     ### Go through a random batch of 128 records from the training data set
     batch = np.random.choice(train_features.index, size=128)
     X, y = train_features.ix[batch].values.T, train_targets.ix[batch]['cnt'].values.reshape((1,-1))
-    parameters = train(X, y, layers_dims, 'regression', parameters, learning_rate)
+    parameters = train(X, y, 'regression', parameters, learning_rate)
     ### Losses
     AL_train = L_model_forward(train_features.values.T, parameters, 'regression')
     AL_val = L_model_forward(val_features.values.T, parameters, 'regression')
