@@ -37,7 +37,7 @@ date: 2019-02-19
 
 记$$dA^{[l]}=\frac{\partial \mathcal{J} }{\partial A^{[l]}}$$，则可推出以下公式：
 + (1) $$dZ^{[l]}=\frac{\partial \mathcal{J} }{\partial Z^{[l]}}=dA^{[l]}* g'(Z^{[l]})$$，其中$$g'$$表示激活函数的导数
-+ (2) $$dW^{[l]} = \frac{\partial \mathcal{J} }{\partial W^{[l]}} = \frac{1}{m} dZ^{[l]} A^{[l-1] T}$$，其中$$A^{[l-1] T}$$表示$$A^{[l-1]$$的转置
++ (2) $$dW^{[l]} = \frac{\partial \mathcal{J} }{\partial W^{[l]}} = \frac{1}{m} dZ^{[l]} A^{[l-1] T}$$，其中$$A^{[l-1] T}$$表示$$A^{[l-1]}$$的转置
 + (3) $$db^{[l]} = \frac{\partial \mathcal{J} }{\partial b^{[l]}} = \frac{1}{m} \sum_{i = 1}^{m} dZ^{[l](i)}$$，其中$$dZ^{[l](i)}$$为矩阵$$dZ^{[l]}$$的第$$i$$列
 + (4) $$dA^{[l-1]} = \frac{\partial \mathcal{J} }{\partial A^{[l-1]}} = W^{[l] T} dZ^{[l]}$$，其中$$W^{[l] T}$$表示$$W^{[l]}$$的转置
 
@@ -80,7 +80,7 @@ def linear_activation_forward(A_prev, W, b, activation):
     A_prev -- activations from previous layer (or input data): (size of previous layer, number of examples)
     W -- weights matrix: numpy array of shape (size of current layer, size of previous layer)
     b -- bias vector, numpy array of shape (size of the current layer, 1)
-    activation -- the activation to be used in this layer, stored as a text string: "sigmoid" or "relu" or "none"
+    activation -- the activation to be used in this layer, stored as a text string: 'sigmoid' or 'relu' or 'none'
 
     Returns:
     A -- the output of the activation function, also called the post-activation value
