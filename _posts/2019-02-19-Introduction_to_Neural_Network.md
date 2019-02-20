@@ -55,7 +55,7 @@ def initialize_parameters_deep(layer_dims):
     layer_dims -- python array (list) containing the dimensions of each layer in our network
 
     Returns:
-    parameters -- python dictionary containing your parameters "W1", "b1", ..., "WL", "bL":
+    parameters -- python dictionary containing your parameters 'W1', 'b1', ..., 'WL', 'bL':
                     Wl -- weight matrix of shape (layer_dims[l], layer_dims[l-1])
                     bl -- bias vector of shape (layer_dims[l], 1)
     """    
@@ -84,7 +84,7 @@ def linear_activation_forward(A_prev, W, b, activation):
 
     Returns:
     A -- the output of the activation function, also called the post-activation value
-    cache -- a python dictionary containing "linear_cache" and "activation_cache";
+    cache -- a python dictionary containing 'linear_cache' and 'activation_cache';
              stored for computing the backward pass efficiently
     """
 
@@ -101,7 +101,7 @@ def L_model_forward(X, parameters, type):
     Arguments:
     X -- data, numpy array of shape (input size, number of examples)
     parameters -- output of initialize_parameters_deep()
-    type -- problem type, stored as a text string: "binary classification" or "regression"
+    type -- problem type, stored as a text string: 'binary classification' or 'regression'
 
     Returns:
     AL -- last post-activation value
@@ -133,7 +133,7 @@ def compute_cost(AL, Y, type):
     Arguments:
     AL -- last post-activation value, shape (1, number of examples)
     Y -- true vector, shape (1, number of examples)
-    type -- problem type, stored as a text string: "binary classification" or "regression"
+    type -- problem type, stored as a text string: 'binary classification' or 'regression'
 
     Returns:
     cost -- cross-entropy loss for classification and mean squared error for regression
