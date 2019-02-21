@@ -279,7 +279,7 @@ def update_parameters(parameters, grads, learning_rate):
 import numpy as np
 def train(X, Y, type, parameters, learning_rate):
     """
-    Implement and Train a neural network
+    Train a neural network
 
     Arguments:
     X -- data, numpy array of shape (input size, number of examples)
@@ -298,6 +298,32 @@ def train(X, Y, type, parameters, learning_rate):
     grads = L_model_backward(AL, Y, caches, type)   # Backward propagation
     parameters = update_parameters(parameters, grads, learning_rate)   # Update parameters
     return parameters
+```
+
+#### Prediction
+```python
+def predict(X, parameters, type):
+    """
+    Predict through neural network
+    Arguments:
+    X -- data, numpy array of shape (input size, number of examples)
+    parameters -- output of initialize_parameters_deep()
+    type -- problem type, stored as a text string: 'binary classification' or 'regression'
+    Returns:
+    AL -- last post-activation value(prediction)
+    """
+    A = X
+    L = len(parameters) // 2   # number of layers in the neural network(excluding the input layer)
+    ### hidden layer
+    for l in range(1, L):
+        A_prev = A
+        A, _ = linear_activation_forward(A_prev, parameters['W'+str(l)], parameters['b'+str(l)], 'relu')
+    ### output layer
+    if type=="regression":
+        AL, _ = linear_activation_forward(A, parameters['W'+str(L)], parameters['b'+str(L)], 'none')
+    else:
+        AL, _ = linear_activation_forward(A, parameters['W'+str(L)], parameters['b'+str(L)], 'sigmoid')           
+    return AL
 ```
 
 ### 三、应用
@@ -332,18 +358,18 @@ train_features, train_targets = features[:-60*24], targets[:-60*24]
 val_features, val_targets = features[-60*24:], targets[-60*24:]  # Hold out the last 60 days or so of the remaining data as a validation set
 ### Train
 layers_dims = [train_features.shape[1], 12, 1]
-learning_rate = 1.0
+learning_rate = 0.1
 iterations = 2000
 losses = {'train':[], 'validation':[]}
 parameters = initialize_parameters_deep(layers_dims)   # Parameters initialization
-for i in range(iterations):
+for ii in range(iterations):
     ### Go through a random batch of 128 records from the training data set
     batch = np.random.choice(train_features.index, size=128)
     X, y = train_features.ix[batch].values.T, train_targets.ix[batch]['cnt'].values.reshape((1,-1))
     parameters = train(X, y, 'regression', parameters, learning_rate)
     ### Losses
-    AL_train = L_model_forward(train_features.values.T, parameters, 'regression')
-    AL_val = L_model_forward(val_features.values.T, parameters, 'regression')
+    AL_train = predict(train_features.values.T, parameters, 'regression')
+    AL_val = predict(val_features.values.T, parameters, 'regression')
     train_loss = compute_cost(AL_train, train_targets['cnt'].values.reshape((1,-1)), 'regression')
     val_loss = compute_cost(AL_val, val_targets['cnt'].values.reshape((1,-1)), 'regression')
     sys.stdout.write("\rProgress: {:2.1f}".format(100 * ii/float(iterations)) \
@@ -360,7 +386,7 @@ _ = plt.ylim()
 ### Predict and Plot(right picture below)
 fig, ax = plt.subplots(figsize=(8,4))
 mean, std = scaled_features['cnt']
-AL_test = L_model_forward(test_features.values.T, parameters, 'regression')
+AL_test = predict(test_features.values.T, parameters, 'regression')
 predictions = AL_test*std + mean
 ax.plot(predictions[0], label='Prediction')
 ax.plot((test_targets['cnt']*std + mean).values, label='Data')
@@ -371,3 +397,5 @@ dates = dates.apply(lambda d: d.strftime('%b %d'))
 ax.set_xticks(np.arange(len(dates))[12::24])
 _ = ax.set_xticklabels(dates[12::24], rotation=45)
 ```
+
+![img](/img/nn2.PNG)
