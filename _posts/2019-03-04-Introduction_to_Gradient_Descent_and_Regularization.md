@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "梯度下降方法介绍"
+title: "梯度下降和正则化介绍"
 tags: [深度学习]
 date: 2019-03-04
 ---
@@ -167,11 +167,17 @@ b^{[l]} = b^{[l]} - \alpha \frac{v^{corrected}_{db^{[l]}}}{\sqrt{s^{corrected}_{
 
 #### Dropout
 
-Dropout在每次迭代过程中随机关掉一些神经元，例如
+Dropout在每次迭代过程中随机关掉一些神经元，针对矩阵$$A^{[l]}$$，有矩阵$$D^{[l]}$$，生成$$D^{[l]}$$的代码如下所示：
+```python
+### 伪代码
+Dl = np.random.rand(Al.shape[0], Al.shape[1])     # Step 1: initialize matrix D1 = np.random.rand(..., ...)
+Dl = (Dl<keep_prob)                               # Step 2: convert entries of D1 to 0 or 1 (using keep_prob as the threshold)
+```
 
-<center>
-<video width="620" height="440" src="img/dropout2_kiank.mp4" type="video/mp4" controls preload>
-</video>
-</center>
+网络的训练过程和文章[神经网络介绍](https://sunwenqi10.github.io/blog/2019/02/19/Introduction_to_Neural_Network)中的基本一致，不同的是：
 
-<caption><center> <u> Figure 3 </u>: Drop-out on the first and third hidden layers. <br> $1^{st}$ layer: we shut down on average 40% of the neurons.  $3^{rd}$ layer: we shut down on average 20% of the neurons. </center></caption>
+(1) 在前向传播过程中按文章中的公式计算出$$A^{[l]}$$后还需要额外进行处理： $$A^{[l]}=A^{[l]}*D^{[l]}$$, $$A^{[l]}=A^{[l]}/keep\_prob$$
+
+(2) 在后向传播过程中使用经过处理后的$$A^{[l]}$$进行计算，并且按文章中的公式计算出$$dA^{[l]}$$后还需要额外进行处理：$$dA^{[l]}=dA^{[l]}*D^{[l]}$$, $$dA^{[l]}=dA^{[l]}/keep\_prob$$
+
+其余训练过程和不加Dropout时的训练过程均相同，但要注意在检验网络或使用网络进行预测时不要使用Dropout（即将keep_prob设为1）
