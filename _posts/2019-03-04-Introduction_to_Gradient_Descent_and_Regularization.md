@@ -15,7 +15,7 @@ date: 2019-03-04
 X = data_input
 Y = labels
 parameters = initialize_parameters(layers_dims)
-for i in range(0, num_iterations):
+for i in range(0, num_epochs):
       # Forward propagation
       a, caches = forward_propagation(X, parameters)
       # Compute cost.
@@ -32,7 +32,7 @@ for i in range(0, num_iterations):
 X = data_input
 Y = labels
 parameters = initialize_parameters(layers_dims)
-for i in range(0, num_iterations):
+for i in range(0, num_epochs):
       for j in range(0, m):
           # Forward propagation
           a, caches = forward_propagation(X[:,j], parameters)
@@ -56,7 +56,7 @@ def random_mini_batches(X, Y, mini_batch_size = 64, seed = 0):
 
        Arguments:
        X -- input data, of shape (input size, number of examples)
-       Y -- true "label" vector (1 for blue dot / 0 for red dot), of shape (1, number of examples)
+       Y -- true label vector (1 for blue dot / 0 for red dot), of shape (1, number of examples)
        mini_batch_size -- size of the mini-batches, integer
 
        Returns:
@@ -92,7 +92,7 @@ X = data_input
 Y = labels
 parameters = initialize_parameters(layers_dims)
 mini_batches = random_mini_batches(X, Y)
-for i in range(0, num_iterations):
+for i in range(0, num_epochs):
        for minibatch in minibatches:
            # Select a minibatch
            (minibatch_X, minibatch_Y) = minibatch
