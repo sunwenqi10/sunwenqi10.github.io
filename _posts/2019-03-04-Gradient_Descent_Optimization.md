@@ -160,3 +160,18 @@ b^{[l]} = b^{[l]} - \alpha \frac{v^{corrected}_{db^{[l]}}}{\sqrt{s^{corrected}_{
 
 
 ### 二、正则化
+
+#### L2(weight decay)
+
+以二分类问题为例，使用L2正则化后的损失函数为$$\mathcal{J}=\underbrace{-\frac{1}{m} \sum\limits_{i = 1}^{m} [y^{(i)}\log\left(a^{[L] (i)}\right) + (1-y^{(i)})\log\left(1- a^{[L](i)}\right)]}_\text{cross-entropy cost} + \underbrace{\frac{\lambda}{2} \sum\limits_l\sum\limits_k\sum\limits_j W_{k,j}^{[l]2} }_\text{L2 regularization cost}$$
+
+#### Dropout
+
+Dropout在每次迭代过程中随机关掉一些神经元，例如
+
+<center>
+<video width="620" height="440" src="img/dropout2_kiank.mp4" type="video/mp4" controls preload>
+</video>
+</center>
+
+<caption><center> <u> Figure 3 </u>: Drop-out on the first and third hidden layers. <br> $1^{st}$ layer: we shut down on average 40% of the neurons.  $3^{rd}$ layer: we shut down on average 20% of the neurons. </center></caption>
