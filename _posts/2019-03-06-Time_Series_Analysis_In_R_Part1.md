@@ -7,16 +7,83 @@ date: 2019-03-06
 
 时间序列模型$$Y_t=m_t+s_t+X_t$$，其中$$m_t$$为趋势项，$$s_t$$为季节项（假设周期为$$d$$，则$$s_t=s_{t+d}$$并且$$\sum_{j=1}^ds_j=0$$），$$X_t$$为平稳项（统计特性不随时间变化而改变）
 
-对于趋势项有两种方式处理：
+一、对于趋势项有两种方式处理：
 
 1. 估计趋势并从原序列中去除，趋势的估计方法主要有以下几种：
 
-   - 滑动平均：可理解为Kernel Regression的一种特殊形式（Nadaraya–Watson estimator），假设滑动窗口为$$2h$$，则$$\hat{m}_t=\frac{\sum_{i=1}^TI(\lvert{i-t}\rvert\leq{h})Y_i}{\sum_{i=1}^TI(\lvert{i-t}\rvert\leq{h})}$$
+   - 滑动平均：
 
-   - 线性回归：$$\hat{m}_t=\beta_0+\sum_{k=1}^p\beta_kt^k$$($$p$$通常取1或2)
+     可理解为Kernel Regression的一种特殊形式（Nadaraya–Watson estimator）
 
-   - Local Polynomial Regression：取最近的k个点进行加权线性回归，假设窗口为$$2h$$，核函数取为$$D(x)=\begin{cases}(1-\lvert{x}\rvert^3)^3, \text{if } \lvert{x}\rvert\leq{1} \\ 0, \text{otherwise}\end{cases}$$，则求解$$argmin_{\beta_k(t),k=0,1,...,p}\sum_{i=1}^TD(\frac{i-t}{h})[Y_i-\sum_{k=0}^p\beta_k(t)i^k]^2$$($$p$$通常取1或2)，$$\hat{m}_t=\beta_0(t)+\sum_{k=1}^p\beta_k(t)t^k$$
+     假设滑动窗口为$$2h$$，则趋势项$$\hat{m}_t=\frac{\sum_{i=1}^TI(\lvert{i-t}\rvert\leq{h})Y_i}{\sum_{i=1}^TI(\lvert{i-t}\rvert\leq{h})}$$
 
-   - Splines Regression：假设选中的knots为$$t_1<t_2<...<t_K$$，以cubic spline为例，它的基函数可取为$$B_1(t)=1,B_2(t)=t,B_3(t)=t^2,B_4(t)=t^3,B_5(t)=(t-t_1)^3_+,...,B_{K+4}(t)=(t-t_K)^3_+$$，$$\hat{m}_t=\sum_{j=1}^{K+4}\beta_jB_j(t)$$；和上述方式等价但能有效减少计算量的方式是cubic B-spline，记
+   - 线性回归：
+
+     趋势项$$\hat{m}_t=\beta_0+\sum_{k=1}^p\beta_kt^k$$，$$p$$通常取1或2
+
+   - Local Polynomial Regression：
+
+     取离目标点最近的几个点进行加权线性回归
+
+     假设窗口为$$2h$$，核函数取为$$D(x)=\begin{cases}(1-\lvert{x}\rvert^3)^3, \text{if } \lvert{x}\rvert\leq{1} \\ 0, \text{otherwise}\end{cases}$$，则需求解$$argmin_{\beta_k(t),k=0,1,...,p}\sum_{i=1}^TD(\frac{i-t}{h})[Y_i-\sum_{k=0}^p\beta_k(t)i^k]^2$$
+
+     趋势项$$\hat{m}_t=\beta_0(t)+\sum_{k=1}^p\beta_k(t)t^k$$，$$p$$通常取1或2
+
+   - Splines Regression：
+      + Truncated Polynomial
+
+        假设选中的knots为$$t_1<t_2<...<t_K$$，以cubic splines(i.e., degree=3)为例，它的基函数可取为$$B_1(t)=1,B_2(t)=t,B_3(t)=t^2,B_4(t)=t^3,B_5(t)=(t-t_1)^3_+,...,B_{K+4}(t)=(t-t_K)^3_+$$
+
+        趋势项$$\hat{m}_t=\sum_{j=1}^{K+4}\beta_jB_j(t)$$
+
+     +  B-Spline
+
+
+        和Truncated Polynomial等价但能有效减少计算量以及特征之间的共线性问题，仍以cubic splines(i.e., degree=3, M=degree+1=4)为例
+
+        记$$t_0$$和$$t_{K+1}$$为boundary knots($$t_0<t_1, t_{K+1}>t_K$$)，令$$\tau_1=\tau_2=...=\tau_M=t_0, \tau_{K+M+1}=\tau_{K+M+2}=...=\tau_{K+2M}=t_{K+1}$$以及$$\tau_{j+M}=t_j, j=1,2,...,K$$
+
+        记$$B_{i,m}(t)$$为第i个阶数为m的基函数，有$$B_{i,1}(t)=\begin{cases}1, \text{if } \tau_i\leq{t}<\tau_{i+1} \\ 0, \text{otherwise}\end{cases}\text{ for }i=1,2,...,K+2M-1$$(注：$$B_{i,1}(t)=0\text{ if }\tau_i=\tau_{i+1}$$)
+
+        根据递推公式$$B_{i,m}(t)=\frac{t-\tau_i}{\tau_{i+m-1}-\tau_i}B_{i,m-1}(t)+\frac{\tau_{i+m}-t}{\tau_{i+m}-\tau_{i+1}}B_{i+1,m-1}(t)\text{ for }i=1,2,...,K+2M-m$$，可以得到$$B_{i,4}(t)\text{ for }i=1,2,...,K+4$$
+
+        趋势项$$\hat{m}_t=\sum_{i=1}^{K+4}\beta_iB_{i,4}(t)$$（注：B-spline可以减少计算量的主要原因是生成的基函数$$B_{i,M}$$最多仅在跨度为$$M+1$$个knots范围内为非0值）
 
 2. 将相邻数据相减从而直接去除趋势，即$$\hat{Y}_t=Y_t-Y_{t-1}$$
+
+趋势估计应用（使用的数据集可从这里下载）
+```r
+data = read.table("AvTempAtlanta.txt",header=T)
+temp = as.vector(t(data[,-c(1,14)])) #去掉第一列和第十四列，转置并变为向量类型（R语言中的数组为列优先）
+temp = ts(temp,start=1879,frequency=12)
+ts.plot(temp,ylab="Temperature") #左图
+## time
+time.pts = c(1:length(temp)) #1,2,...,length(temp)
+time.pts = c(time.pts - min(time.pts))/max(time.pts)
+## Fit a moving average
+mav.fit = ksmooth(time.pts, temp, kernel = "box")
+temp.fit.mav = ts(mav.fit$y,start=1879,frequency=12)
+## Fit a linear regression(quadraric polynomial)
+x1 = time.pts
+x2 = time.pts^2
+lm.fit = lm(temp~x1+x2)
+print(summary(lm.fit))
+temp.fit.lm = ts(fitted(lm.fit),start=1879,frequency=12)
+## Fit a local polynomial regression
+loc.fit = loess(temp~time.pts)
+temp.fit.loc = ts(fitted(loc.fit),start=1879,frequency=12)
+## Fit a splines regression
+library(mgcv)
+gam.fit = gam(temp~s(time.pts))
+temp.fit.gam = ts(fitted(gam.fit),start=1879,frequency=12)
+## Compare all estimated trends
+all.val = c(temp.fit.mav,temp.fit.lm,temp.fit.gam,temp.fit.loc)
+ylim= c(min(all.val),max(all.val))
+ts.plot(temp.fit.lm,lwd=2,col="green",ylim=ylim,ylab="Temperature") #右图
+lines(temp.fit.mav,lwd=2,col="purple")
+lines(temp.fit.gam,lwd=2,col="red")
+lines(temp.fit.loc,lwd=2,col="brown")
+legend(x=1900,y=64,legend=c("MAV","LM","GAM","LOESS"),lty = 1, col=c("purple","green","red","brown"))
+```
+
+![img](/img/ts.png)
