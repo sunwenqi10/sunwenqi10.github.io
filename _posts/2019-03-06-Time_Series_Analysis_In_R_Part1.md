@@ -5,7 +5,7 @@ tags: [时间序列]
 date: 2019-03-06
 ---
 
-时间序列模型$$Y_t=m_t+s_t+X_t$$，其中$$m_t$$为趋势项，$$s_t$$为季节项（假设周期为$$d$$，则$$s_t=s_{t+d}$$并且$$\sum_{j=1}^ds_j=0$$），$$X_t$$为平稳项（统计特性不随时间变化而改变）
+时间序列模型$$Y_t=m_t+s_t+X_t$$，其中$$m_t$$为趋势项，$$s_t$$为季节项（假设周期为$$d$$，则$$s_t=s_{t+d}$$），$$X_t$$为平稳项（统计特性不随时间变化而改变）
 
 一、对于趋势项有两种方式处理：
 
@@ -51,7 +51,7 @@ date: 2019-03-06
 
 2. 将相邻数据相减从而直接去除趋势，即$$\hat{Y}_t=Y_t-Y_{t-1}$$
 
-趋势估计应用（使用的数据集可从这里下载）
+趋势估计应用（使用的数据集可从[这里](https://pan.baidu.com/s/1i7Wn5DNqyz2CFnMYqUz3vg)下载，提取码为16mm）
 ```r
 data = read.table("AvTempAtlanta.txt",header=T)
 temp = as.vector(t(data[,-c(1,14)])) #去掉第一列和第十四列，转置并变为向量类型（R语言中的数组为列优先）
@@ -87,3 +87,52 @@ legend(x=1900,y=64,legend=c("MAV","LM","GAM","LOESS"),lty = 1, col=c("purple","g
 ```
 
 ![img](/img/ts.png)
+
+二、对于季节项也有两种处理方式：
+
+1. 估计季节项并从原序列中去除，估计方法主要有以下几种：
+
+   + 季节平均$$\hat{s}_k=average(Y_{k+jd}, j\geq0\text{ and }k+jd\leq{T}) \text{ for } k=1,2,...,d$$
+
+   + 三角函数$$\hat{s}_t=\beta_0+\beta_1cos(2\pi{f}t)+\beta_2sin(2\pi{f}t)$$，$$f=1/d$$
+      + 若存在多个周期，则有$$\hat{s}_t=\beta_0+\sum_{j=1}^J[\beta_{1j}cos(2\pi{f}_jt)+\beta_{2j}sin(2\pi{f}_jt)]$$
+
+2. 数据相减直接去除季节性，即$$\nabla_dY_t=Y_t-Y_{t-d}=m_t-m_{t-d}+X_t-X_{t-d}$$
+
+季节估计应用
+```r
+library(TSA)
+## Estimate seasonality using seasonal mean model
+month = season(temp)
+model1 = lm(temp~month-1) #all seasonal mean effects (model without intercept)
+print(summary(model1))
+## Estimate seasonality using cos-sin model
+har2=harmonic(temp,2)
+model2=lm(temp~har2)
+print(summary(model2))
+## Compare Seasonality Estimates
+st1 = coef(model1)
+st2 = fitted(model2)[1:12]
+plot(1:12,st1,lwd=2,type="l",col='green',xlab="Month",ylab="Seasonality") #左图
+lines(1:12,st2,lwd=2, col="brown")
+```
+
+趋势和季节估计应用
+```r
+## Linear Regression
+x1 = time.pts
+x2 = time.pts^2
+har2=harmonic(temp,2)
+lm.fit = lm(temp~x1+x2+har2)
+print(summary(lm.fit))
+dif.fit.lm = ts((temp-fitted(lm.fit)),start=1879,frequency=12)
+## Spline Regression for Trend and Linear Regression for Seasonality
+gam.fit = gam(temp~s(time.pts)+har2)
+print(summary(gam.fit))
+dif.fit.gam = ts((temp-fitted(gam.fit)),start=1879,frequency=12)
+## Compare approaches
+ts.plot(dif.fit.lm,ylab="Residual Process",col="brown") #右图
+lines(dif.fit.gam,col="blue")
+```
+
+![img](/img/ts2.png)
