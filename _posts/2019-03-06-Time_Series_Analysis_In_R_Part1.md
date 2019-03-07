@@ -7,7 +7,7 @@ date: 2019-03-06
 
 时间序列模型$$Y_t=m_t+s_t+X_t$$，其中$$m_t$$为趋势项，$$s_t$$为季节项（假设周期为$$d$$，则$$s_t=s_{t+d}$$），$$X_t$$为平稳项（统计特性不随时间变化而改变）
 
-一、对于趋势项有两种方式处理：
+### 一、对于趋势项的两种处理方式：
 
 1. 估计趋势并从原序列中去除，趋势的估计方法主要有以下几种：
 
@@ -88,7 +88,7 @@ legend(x=1900,y=64,legend=c("MAV","LM","GAM","LOESS"),lty = 1, col=c("purple","g
 
 ![img](/img/ts.png)
 
-二、对于季节项也有两种处理方式：
+### 二、对于季节项的两种处理方式：
 
 1. 估计季节项并从原序列中去除，估计方法主要有以下几种：
 
@@ -136,3 +136,27 @@ lines(dif.fit.gam,col="blue")
 ```
 
 ![img](/img/ts2.png)
+
+### 三、平稳项
+
+Auto-Covariance Function $$cov(X_r,X_s)=E[(X_r-E[X_r])(X_s-E[X_s])]$$
+
+如果满足$$\begin{cases}E[X_t]=m\text{ for all t} \\ E[X_t^2]<\infty\text{ for all t} \\ cov(X_r,X_s)=cov(X_{r+t},X_{s+t})\text{ for all r,s,t}\end{cases}$$，则序列$$\{X_t\}$$是（弱）平稳序列
+
+针对平稳序列，定义Auto-Covariance Function $$\gamma_X(h)=cov(X_t, X_{t+h})$$, $$t$$可取任意值，则Auto-Correlation Function(ACF) $$\rho_X(h)=\frac{\gamma_X(h)}{\gamma_X(0)}$$
+
+Sample Auto-Covariance Function $$\hat{\gamma}_X(h)=\frac{1}{T}\sum_{t=1}^{T-h}(X_t-\bar{X})(X_{t+h}-\bar{X}),\text{ }0\leq{h}<T$$，其中$$\bar{X}=\frac{1}{T}\sum_{t=1}^{T}X_t$$
+
+Sample ACF可表示为$$\hat{\rho}_X(h)=\frac{\hat{\gamma}_X(h)}{\hat{\gamma}_X(0)}$$
+
+```r
+acf(temp,lag.max=12*4,main="") #左图（用于对比）
+acf(dif.fit.lm,lag.max=12*4,main="") #中图
+acf(dif.fit.gam,lag.max=12*4,main="") #右图
+```  
+
+![img](/img/ts3.png)
+
+### 四、完整案例应用
+
+使用的数据集可从[这里](https://pan.baidu.com/s/1RB6mMabsEh0ik4wg35tZWw)下载，提取码为uqq8
