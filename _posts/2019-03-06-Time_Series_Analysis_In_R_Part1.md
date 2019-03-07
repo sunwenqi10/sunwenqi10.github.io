@@ -223,10 +223,10 @@ resid.3 = Volume.tr-vol.fit.gam.seastr.2
 ## Compare Residuals
 y.min = min(c(resid.1,resid.2,resid.3))
 y.max = max(c(resid.1,resid.2,resid.3))
-plot(dates, resid.1, ylim=c(y.min, y.max), type="l", ylab="Residual Process")  
+plot(dates, resid.1, ylim=c(y.min, y.max), type="l", ylab="Residual Process") #上图  
 lines(dates,resid.2,col="blue")
 lines(dates,resid.3,col="brown")
-legend("bottom",legend=c("Trend","Season","Trend+Season"),lty = 1, col=c("black","blue","brown")) #上图
+legend("bottom",legend=c("Trend","Season","Trend+Season"),lty = 1, col=c("black","blue","brown")) 
 ## ACF
 acf(resid.1,lag.max=12*4,main="") #左下图
 acf(resid.2,lag.max=12*4,main="",col="blue") #中下图
