@@ -160,3 +160,79 @@ acf(dif.fit.gam,lag.max=12*4,main="") #右图
 ### 四、完整案例应用
 
 使用的数据集可从[这里](https://pan.baidu.com/s/1RB6mMabsEh0ik4wg35tZWw)下载，提取码为uqq8
+
++ Process Data
+```r
+edvoldata = read.csv("EGDailyVolume.csv",header=T)
+## Process Dates
+year = edvoldata$Year
+month = edvoldata$Month
+day = edvoldata$Day
+datemat = cbind(as.character(day),as.character(month),as.character(year))
+paste.dates = function(date){
+       day = date[1]; month=date[2]; year = date[3]
+       return(paste(day,month,year,sep="/"))
+ }
+dates = apply(datemat,1,paste.dates)
+dates = as.Date(dates, format="%d/%m/%Y")
+edvoldata = cbind(dates,edvoldata)
+## Transform ED Volume data(Stabilize Variance)
+Volume.tr = sqrt(edvoldata$Volume+3/8)
+hist(edvoldata$Volume,nclass=20,xlab="ED Volume", main="",col="brown") #左图
+hist(Volume.tr,nclass=20,xlab= "Transformed ED Volume", main="",col="blue") #右图
+```
+
+![img](/img/ts5.png)
+
++ Trend and Seasonality
+```r
+library(mgcv)
+time.pts = c(1:length(Volume.tr))
+time.pts = c(time.pts - min(time.pts))/max(time.pts)
+## Model Trend + Monthly Seasonality
+## Use Splines Trend and Seasonal Mean Model
+month = as.factor(format(dates,"%b"))
+gam.fit.seastr.1 = gam(Volume.tr~s(time.pts)+month)
+print(summary(gam.fit.seastr.1))
+vol.fit.gam.seastr.1 = fitted(gam.fit.seastr.1)
+## Add day-of-the-week seasonality
+week = as.factor(weekdays(dates))
+gam.fit.seastr.2 = gam(Volume.tr~s(time.pts)+month+week)
+print(summary(gam.fit.seastr.2))
+vol.fit.gam.seastr.2 = fitted(gam.fit.seastr.2)
+## Compare the two fits: with & without day-of-the-week seasonality
+plot(dates,Volume.tr,type="l",ylab="Transformed Daily ED Volume") #下图
+lines(dates,vol.fit.gam.seastr.2,lwd=2,col="red")
+lines(dates,vol.fit.gam.seastr.1,lwd=2,col="green")
+```
+
+![img](/img/ts6.png)
+
++ Stationary Residual
+```r
+## Residual Process: Trend Removal
+gam.fit = gam(Volume.tr~s(time.pts))
+vol.fit.gam = fitted(gam.fit)
+resid.1 = Volume.tr-vol.fit.gam
+## Residual Process: Seasonal Removal
+lm.fit.seastr.2 = lm(Volume.tr~month+week)
+vol.fit.lm.seastr.2 = fitted(lm.fit.seastr.2)
+resid.2 = Volume.tr-vol.fit.lm.seastr.2
+## Residual Process: Trend & Seasonal Removal
+resid.3 = Volume.tr-vol.fit.gam.seastr.2
+## Compare Residuals
+y.min = min(c(resid.1,resid.2,resid.3))
+y.max = max(c(resid.1,resid.2,resid.3))
+plot(dates, resid.1, ylim=c(y.min, y.max), type="l", ylab="Residual Process")  
+lines(dates,resid.2,col="blue")
+lines(dates,resid.3,col="brown")
+legend("bottom",legend=c("Trend","Season","Trend+Season"),lty = 1, col=c("black","blue","brown")) #上图
+## ACF
+acf(resid.1,lag.max=12*4,main="") #左下图
+acf(resid.2,lag.max=12*4,main="",col="blue") #中下图
+acf(resid.3,lag.max=12*4,main="",col="brown") #右下图
+```
+
+![img](/img/ts7.png)
+
+![img](/img/ts8.png)
