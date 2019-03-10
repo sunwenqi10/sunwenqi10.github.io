@@ -11,4 +11,4 @@ date: 2019-03-10
 
 运用迁移学习的思想，
 
-![img](/img/nlp.PNG)
+![img](/img/nlp1.png)
