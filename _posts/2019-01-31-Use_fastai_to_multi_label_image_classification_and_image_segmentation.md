@@ -54,9 +54,9 @@ tfms = get_transforms(flip_vert=True, max_lighting=0.1, max_zoom=1.05, max_warp=
 ###     2. train/validation split         3. 读取图片对应的标签(默认为第二列)
 ###     4. data augmentation and resize   5. 生成DataBunch并对数据进行标准化
 np.random.seed(42)
-src = ImageItemList.from_csv(path, 'train_v2.csv', folder='train-jpg', suffix='.jpg')  \
-                   .random_split_by_pct(0.2) \
-                   .label_from_df(label_delim=' ')
+src = ImageList.from_csv(path, 'train_v2.csv', folder='train-jpg', suffix='.jpg')  \
+               .random_split_by_pct(0.2) \
+               .label_from_df(label_delim=' ')
 data = src.transform(tfms, size=128) \
           .databunch(bs=64).normalize(imagenet_stats)
 ### Metrics
