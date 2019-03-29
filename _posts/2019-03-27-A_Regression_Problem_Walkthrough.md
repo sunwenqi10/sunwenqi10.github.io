@@ -23,6 +23,11 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from IPython.core.pylabtools import figsize
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction import DictVectorizer
+from sklearn.preprocessing import Imputer, FunctionTransformer
+from sklearn_pandas import DataFrameMapper, CategoricalImputer
+from sklearn.pipeline import FeatureUnion, Pipeline
 data = pd.read_csv('Energy_and_Water_Data_Disclosure_for_Local_Law_84_2017__Data_for_Calendar_Year_2016.csv')
 data = data.replace({'Not Available': np.nan})
 numeric_units = ['ft²','kBtu','Metric Tons CO2e','kWh','therms','gal','Score']
@@ -158,3 +163,44 @@ plt.suptitle('Pairs Plot of Energy Data', size = 24, y = 1.02)
 ![img](/img/reg4.PNG)
 
 ### 2. 特征工程和选择
+
++ 特征工程
+```python
+### Extract the buildings with no score and the buildings with a score
+numeric_cols = data.columns[data.dtypes!=object].tolist()
+categorical_cols = ['Borough', 'Largest Property Use Type']
+no_score = data[numeric_cols+categorical_cols][data['score'].isna()] #for prediction
+score = data[numeric_cols+categorical_cols][data['score'].notnull()]
+### Separate out the features and targets
+features = score.drop(columns='score')
+targets = pd.DataFrame(score['score'])
+numeric_cols.remove('score')
+### Split into 70% training and 30% testing set
+X, X_test, y, y_test = train_test_split(features, targets, test_size = 0.3, random_state = 42)
+### Apply numeric imputer
+numeric_imputer = [([feature], Imputer(strategy="median")) for feature in numeric_cols]
+numeric_imputation_mapper = DataFrameMapper(numeric_imputer, input_df=True, df_out=True)
+### Create columns with log of numeric columns
+def add_log(df):
+      temp = df.copy()
+      for col in numeric_cols:
+          temp['log_' + col] = np.sign(df[col])*np.log(np.abs(df[col])+1)
+      return temp
+### Numerical Transformations
+numeric = Pipeline([("num_mapper", numeric_imputation_mapper),
+                      ("add_log", FunctionTransformer(add_log, validate=False))])
+### Apply categorical imputer
+category_imputer = [(feature, CategoricalImputer(strategy='constant', fill_value='Missing')) \
+                      for feature in categorical_cols]
+categorical_imputation_mapper = DataFrameMapper(category_imputer,input_df=True,df_out=True)
+### One-hot Encode
+def dictify(df):
+      return df.to_dict("records")
+onehot = Pipeline([("dictifier", FunctionTransformer(dictify, validate=False)), \
+                     ("dictvectier", DictVectorizer(sparse=False))])
+### Categorical Transformations
+category = Pipeline([("cat_mapper", categorical_imputation_mapper), \
+                       ("onehot", onehot)])
+### Combine the numeric and categorical transformations
+num_cat_union = FeatureUnion([("num_trans", numeric), ("cat_trans", category)])
+```
