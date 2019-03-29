@@ -73,7 +73,7 @@ plt.hist(data['score'].dropna(), bins = 100, edgecolor = 'k')
 plt.xlabel('Score'); plt.ylabel('Number of Buildings')
 plt.title('Energy Star Score Distribution')   
 ```
-![img](/img/reg1.png)
+![img](/img/reg1.PNG)
 
 + Correlations between the target and numerical variables
 ```python
